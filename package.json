@@ -16,7 +16,7 @@
     "@astrojs/markdown-satteri": "^0.4.2",
     "@astrojs/react": "^7.0.1",
     "@astrojs/starlight": "^0.42.5",
-    "@astrojs/vercel": "^11.0.13",
+    "@astrojs/vercel": "^11.0.16",
     "@better-auth/mongo-adapter": "^1.7.7",
     "@hugeicons/core-free-icons": "^4.3.5",
     "@hugeicons/react": "^1.1.10",
