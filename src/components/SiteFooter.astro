@@ -1,0 +1,37 @@
+---
+// The landing page's footer, shared with the dashboard.
+import { SITE } from '../site';
+---
+
+<footer class="footer">
+	<div class="wrap footer-inner">
+		<div class="footer-brand">
+			<a class="brand" href="/">
+				<img src="/android-chrome-192x192.png" alt="" width="28" height="28" />
+				<span>Miru</span>
+			</a>
+			<p>{SITE.tagline}. In active development.</p>
+		</div>
+		<nav class="footer-links" aria-label="Footer">
+			<div>
+				<h4>Docs</h4>
+				<a href="/docs/getting-started/">Get started</a>
+				<a href="/docs/commands/">Commands</a>
+				<a href="/docs/faq/">FAQ</a>
+			</div>
+			<div>
+				<h4>About</h4>
+				<a href="/premium/">Premium</a>
+				<a href="/docs/privacy/">Privacy</a>
+				<a href="/docs/open-source/">Open source</a>
+				<a href={SITE.author.href} target="_blank" rel="noopener noreferrer">{SITE.author.name}</a>
+			</div>
+		</nav>
+	</div>
+	<div class="wrap footer-fine">
+		<p>
+			Data from <a href="https://anilist.co" target="_blank" rel="noopener noreferrer">AniList</a>, <a href="https://jikan.moe" target="_blank" rel="noopener noreferrer">Jikan</a> and{' '}
+			<a href="https://trace.moe" target="_blank" rel="noopener noreferrer">trace.moe</a>. Not affiliated with Discord or AniList.
+		</p>
+	</div>
+</footer>

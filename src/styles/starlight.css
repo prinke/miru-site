@@ -1,0 +1,72 @@
+/* Docs theme, matched to the landing page palette. */
+
+:root {
+	--sl-font: 'Figtree', system-ui, sans-serif;
+	--sl-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+	--sl-text-h1: 2.4rem;
+}
+
+/* Dark mode */
+:root {
+	--sl-color-accent-low: #4a1f33;
+	--sl-color-accent: #ff6fa8;
+	--sl-color-accent-high: #ffd3e3;
+	--sl-color-white: #fff;
+	--sl-color-gray-1: #fcebf2;
+	--sl-color-gray-2: #d9bfcb;
+	--sl-color-gray-3: #a88b99;
+	--sl-color-gray-4: #6e5363;
+	--sl-color-gray-5: #3d2a35;
+	--sl-color-gray-6: #2a1d25;
+	--sl-color-black: #1b1218;
+}
+
+/* Light mode */
+:root[data-theme='light'] {
+	--sl-color-accent-low: #ffe1ec;
+	--sl-color-accent: #d6417f;
+	--sl-color-accent-high: #7a1f47;
+	--sl-color-white: #3a2533;
+	--sl-color-gray-1: #4a3341;
+	--sl-color-gray-2: #6e5363;
+	--sl-color-gray-3: #9a7f8d;
+	--sl-color-gray-4: #c9afbb;
+	--sl-color-gray-5: #f3dbe3;
+	--sl-color-gray-6: #fff0f3;
+	--sl-color-gray-7: #fff8f6;
+	--sl-color-black: #fffcfb;
+}
+
+/* Text highlight, same as the landing page */
+::selection {
+	background: #5a2d42;
+	color: #fcebf2;
+}
+:root[data-theme='light'] ::selection {
+	background: #ffd3e3;
+	color: #3a2533;
+}
+
+.sl-markdown-content :is(h1, h2, h3, h4),
+h1#_top,
+.site-title {
+	font-family: 'Zen Maru Gothic', sans-serif;
+	font-weight: 700;
+}
+.site-title {
+	font-weight: 900;
+}
+
+/* AGPL logo on the open source page. The purple artwork needs a light backing in dark mode. */
+.sl-markdown-content .agpl-badge {
+	display: block;
+	width: fit-content;
+	margin-block: 1rem;
+	padding: 0.5rem 0.75rem;
+	border-radius: 0.75rem;
+	background: #fff;
+	border: 1px solid var(--sl-color-gray-5);
+}
+.sl-markdown-content .agpl-badge img {
+	display: block;
+}

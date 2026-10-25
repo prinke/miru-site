@@ -1,0 +1,44 @@
+---
+title: /anime
+description: Search anime by title.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+```
+/anime <query>
+```
+
+Search anime by title. No AniList account needed. The reply is public.
+
+## Results
+
+Miru shows up to 25 results. Use the dropdown to switch between them; each option shows the format, year, score and episode count.
+
+The card shows:
+
+- English title, with the romaji title underneath
+- Studio, score, rank, format, episode count and episode length
+- Synopsis
+- Status, season and air dates
+- Genres
+- A **Next Episode** countdown if the show is airing, otherwise the **Source** material
+- AniList banner art, when there is one
+
+The card's colour shows the status: green for airing, grey for not yet aired, amber for hiatus and red for cancelled.
+
+The footer shows where the data came from (AniList, or MyAnimeList via Jikan) and which result you're on ("N of M").
+
+## List buttons
+
+If you've [linked AniList](/docs/commands/link/), buttons to add the show to your list, log an episode or rate it appear under the result. See [List buttons](/docs/features/list-buttons/).
+
+## Good to know
+
+- Controls last **5 minutes**.
+- Adult titles are excluded from AniList search.
+- If AniList can't be reached, Miru searches MyAnimeList instead. See [Data sources](/docs/features/list-buttons/#data-sources).
+
+<Aside type="tip">
+Looking for a manga? Use [`/manga`](/docs/commands/manga/). For a whole season at once, try [`/season`](/docs/commands/season/).
+</Aside>

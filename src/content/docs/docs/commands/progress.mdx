@@ -1,0 +1,41 @@
+---
+title: /progress
+description: Log an episode or chapter, or rate something on your list.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+```
+/progress <title> [episode] [score]
+```
+
+Log progress or rate something on your AniList list. Needs a [linked account](/docs/commands/link/). The reply is private.
+
+## Options
+
+| Option | What it does |
+| --- | --- |
+| `title` | Autocompletes from your **Watching**, **Rewatching**, **Paused** and **Planning** lists (anime and manga together). Each suggestion shows where you are, like `Ep 3/12` or `Ch 40/?`. |
+| `episode` | Set progress to an exact number. You can go backwards. |
+| `score` | Score out of 10. Decimals are fine (`8.5`), and `0` clears the score. |
+
+## Examples
+
+| You type | What happens |
+| --- | --- |
+| `/progress title:Frieren` | Adds **+1** episode |
+| `/progress title:Frieren episode:12` | Sets progress to episode 12 |
+| `/progress title:Frieren score:9` | Sets your score to 9 and leaves progress alone |
+| `/progress title:Frieren episode:28 score:9.5` | Sets progress and score together |
+
+## Finishing a show
+
+When you log the last episode or chapter, Miru marks it **Completed** 🎉 and suggests rating it.
+
+## Binge button
+
+The reply has a **+1 episode** (or **+1 chapter**) button, so you can keep logging without retyping the command. It lasts **5 minutes**.
+
+<Aside type="tip" title="Not on your list?">
+`/progress` only works for titles already on your list. Add it first with the **Add to list** button on [`/anime`](/docs/commands/anime/) or [`/manga`](/docs/commands/manga/).
+</Aside>

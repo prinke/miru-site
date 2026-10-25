@@ -1,0 +1,51 @@
+---
+title: Server feed
+description: Share what members finish, start and drop in a channel.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+The server feed posts members' AniList activity in a channel: what they finish, start, drop and (if you like) every episode they watch.
+
+<Aside type="note" title="Server install only">
+The feed needs Miru to be [installed to the server](/docs/getting-started/#1-add-miru), not just added as a personal app.
+</Aside>
+
+## Setting it up
+
+<Steps>
+
+1. An admin with **Manage Server** runs [`/feed`](/docs/commands/feed/#settings-for-admins) and picks a channel from the panel. Miru needs **View Channel**, **Send Messages** and **Embed Links** there.
+
+2. Choose a mode from the same panel: **Highlights** (the default) or **Everything**.
+
+3. Members who want to be included run [`/feed`](/docs/commands/feed/#joining-and-leaving) and press **Join the feed**. They need to have [linked AniList](/docs/commands/link/) first.
+
+</Steps>
+
+| Mode | Posts |
+| --- | --- |
+| **Highlights** | Finishes, drops, rewatch and reread completions, and new starts |
+| **Everything** | Every episode and chapter |
+
+## Opt-in only
+
+Nobody is ever added to the feed automatically. Each member decides for themselves by joining from `/feed`, and can leave any time from the same panel.
+
+Joining also includes you in [`/recommend for:This server`](/docs/commands/recommend/#for-this-server) and the server ranking on [`/wrapped`](/docs/commands/wrapped/#rankings).
+
+## What posts look like
+
+Each post shows:
+
+- The member's AniList name and avatar
+- A mention of them (it never pings)
+- What they did, like "completed", "started watching" or "watched episodes 4 - 6 of"
+- The title and cover
+- Their score, for completed titles
+
+## How it works
+
+Miru reads activity straight from AniList, so changes made on the AniList website or apps show up too, not only changes made through Miru. It checks every 3 minutes.
+
+Only public activity is posted. See [Privacy](/docs/privacy/).

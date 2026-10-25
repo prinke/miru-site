@@ -1,0 +1,33 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+import { SITE } from '../site.ts';
+---
+
+<Default><slot /></Default>
+<p class="docs-footer-links">
+	<a href="/premium/">Premium</a>
+	<span aria-hidden="true">·</span>
+	<a href="/docs/privacy/">Privacy</a>
+	<span aria-hidden="true">·</span>
+	<a href="/docs/open-source/">Open source</a>
+	<span aria-hidden="true">·</span>
+	<a href={SITE.author.href} target="_blank" rel="noopener noreferrer">{SITE.author.name}</a>
+</p>
+
+<style>
+	.docs-footer-links {
+		margin-top: 1.5rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+	.docs-footer-links a {
+		color: var(--sl-color-gray-2);
+		text-decoration: none;
+	}
+	.docs-footer-links a:hover {
+		color: var(--sl-color-accent);
+	}
+</style>

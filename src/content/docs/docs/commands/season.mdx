@@ -1,0 +1,48 @@
+---
+title: /season
+description: Browse a season's anime chart.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+```
+/season [season] [year] [sort] [format]
+```
+
+Browse a season's anime chart. No AniList account needed. The reply is public.
+
+## Options
+
+| Option | Choices | Default |
+| --- | --- | --- |
+| `season` | Winter, Spring, Summer, Fall | Current season |
+| `year` | 1940 or later | Current year |
+| `sort` | Popularity, Score, Trending, Start date | Popularity |
+| `format` | TV, Movies, ONA, OVA & specials | Everything |
+
+## The chart
+
+The chart shows 10 shows per page, with **Previous** and **Next** buttons. Each line shows the format, score, episode count and a countdown to the next episode.
+
+If you've [linked AniList](/docs/commands/link/), each show is tagged with your list status, like `Watching` or `Planning`.
+
+Pick a show from the **Open a show…** dropdown to see its full card, with [list buttons](/docs/features/list-buttons/) if you're linked. **Back to chart** takes you back.
+
+## Seasons
+
+Seasons follow AniList:
+
+| Season | Months |
+| --- | --- |
+| Winter | December – February |
+| Spring | March – May |
+| Summer | June – August |
+| Fall | September – November |
+
+<Aside type="caution" title="December counts as next year">
+December belongs to the *next* year's Winter. Shows starting in December 2026 are in Winter 2027.
+</Aside>
+
+## Good to know
+
+- Controls last **10 minutes**.

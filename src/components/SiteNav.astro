@@ -1,0 +1,50 @@
+---
+// Top nav shared by the marketing pages and the dashboard.
+import { UserMenu } from './UserMenu';
+import { badgeVariants } from './ui/badge';
+import { buttonVariants } from './ui/button';
+import { cn } from '../lib/utils';
+import { INVITE } from '../site';
+
+interface Props {
+	// Known on server-rendered pages, so the account menu shows without a fetch.
+	user?: { name: string; image?: string | null } | null;
+}
+
+const { user } = Astro.props;
+---
+
+<header class="nav">
+	<div class="wrap nav-inner">
+		<a class="brand" href="/">
+			<img src="/android-chrome-192x192.png" alt="" width="34" height="34" />
+			<span>Miru</span>
+			<span class={cn(badgeVariants({ variant: 'warning' }), 'px-2 font-sans text-[11px] tracking-[0.08em] uppercase')}>beta</span>
+		</a>
+		<nav class="nav-links" aria-label="Main">
+			<a href="/docs/getting-started/">Get started</a>
+			<a href="/docs/commands/">Commands</a>
+			<a href="/docs/faq/">FAQ</a>
+			<a class="nav-premium" href="/premium/"><span aria-hidden="true">✦</span> Premium</a>
+		</nav>
+		<div class="nav-actions">
+			<button class={cn(buttonVariants({ variant: 'secondary', size: 'icon' }), 'theme-toggle')} type="button" aria-label="Toggle dark mode">
+				<svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" /></svg>
+				<svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></svg>
+			</button>
+			<UserMenu client:load initialUser={user ? { name: user.name, image: user.image } : undefined} />
+			<a class={cn(buttonVariants({ size: 'sm' }), 'max-[520px]:hidden')} href={INVITE.any} target="_blank" rel="noopener noreferrer">Add to Discord</a>
+		</div>
+	</div>
+</header>
+
+<script>
+	const root = document.documentElement;
+	document.querySelector('.theme-toggle')?.addEventListener('click', () => {
+		const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+		root.dataset.theme = next;
+		try {
+			localStorage.setItem('starlight-theme', next);
+		} catch {}
+	});
+</script>

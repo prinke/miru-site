@@ -1,0 +1,45 @@
+---
+title: Open source
+description: Miru's source code, license, contributing and self-hosting.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import { INVITE } from '../../../../site.ts';
+
+Miru's code is public on GitHub under the **GNU AGPL v3.0**. So is the code for this website.
+
+**Source:** [github.com/prinke/miru](https://github.com/prinke/miru)
+
+## License
+
+<a class="agpl-badge" href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer">
+	<img src="/AGPLv3_logo_purple.png" alt="GNU AGPL v3: Free as in Freedom" width="162" height="68" />
+</a>
+
+In plain words: you can use, modify and run your own copy of Miru. If you run a modified version that other people use, including as a public Discord bot, you must give those users your modified source code under the same license.
+
+Paid features planned for the hosted bot won't be part of the open-source code.
+
+### Name and branding
+
+The license covers the code, not the name. Public forks must use a different name and avatar.
+
+## Contributing
+
+Issues and pull requests are welcome on [GitHub](https://github.com/prinke/miru).
+
+## Self-hosting
+
+<Aside type="caution">
+Self-hosting is for developers and is not officially supported. Self-hosted copies include every feature in the public code. Most people should <a href={INVITE.server} target="_blank" rel="noopener noreferrer">invite the hosted bot</a> instead.
+</Aside>
+
+Setup steps live in the [README](https://github.com/prinke/miru#readme) so there's one source of truth. In short, you'll need:
+
+- Node.js 18 or later
+- A Discord application and bot token from the [Developer Portal](https://discord.com/developers/applications)
+- MongoDB (a free Atlas cluster works)
+- An AniList API client from [anilist.co/settings/developer](https://anilist.co/settings/developer), with the Redirect URL set to exactly `https://anilist.co/api/v2/oauth/pin`
+- Optionally, a trace.moe API key. Without one you get 100 searches a month per server IP, one at a time.
+
+Curious how it fits together? See [Architecture](/docs/open-source/architecture/).

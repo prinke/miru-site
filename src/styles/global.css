@@ -1,0 +1,100 @@
+/* Tailwind + shadcn/ui for the landing, login and dashboard pages. The docs keep
+   Starlight's own styles and never load this file. */
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+/* Miru's palette and hand-written page styles. Layered so Tailwind utilities on
+   shadcn components win over them, while they still win over preflight. */
+@import './landing.css' layer(components);
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* shadcn's tokens point straight at Miru's palette in landing.css, which already
+   switches with the theme. Miru's `--muted` and `--radius` mean something else
+   there, so the usual intermediate variables are skipped. */
+@theme inline {
+	--font-sans: var(--body);
+	--font-heading: var(--display);
+	--font-mono: var(--mono);
+
+	--color-background: var(--bg);
+	--color-foreground: var(--ink);
+	--color-card: var(--surface);
+	--color-card-foreground: var(--ink);
+	--color-popover: var(--surface);
+	--color-popover-foreground: var(--ink);
+	--color-primary: var(--pink);
+	--color-primary-foreground: var(--on-pink);
+	--color-secondary: var(--pink-wash);
+	--color-secondary-foreground: var(--ink);
+	--color-muted: var(--pink-wash);
+	--color-muted-foreground: var(--muted);
+	--color-accent: var(--pink-wash);
+	--color-accent-foreground: var(--ink);
+	--color-destructive: #c43a3a;
+	--color-border: var(--line);
+	--color-input: var(--line);
+	--color-ring: var(--lav);
+
+	/* Miru extras, for the few places shadcn's names don't fit. */
+	--color-ink-soft: var(--ink-soft);
+	--color-pink-deep: var(--pink-deep);
+	--color-pink-soft: var(--pink-soft);
+	--color-butter: var(--butter);
+	--color-mint: var(--mint);
+
+	--radius-sm: 10px;
+	--radius-md: 12px;
+	--radius-lg: 14px;
+	--radius-xl: 16px;
+	--radius-2xl: 18px;
+	--radius-3xl: var(--radius);
+	--radius-4xl: 999px;
+
+	--shadow-card: var(--shadow);
+}
+
+:root {
+	--on-pink: #fff;
+	--pink-edge: var(--pink-deep);
+	--pink-glow: rgb(236 95 154 / 0.6);
+}
+:root[data-theme='dark'] {
+	--on-pink: #2a0f1d;
+	--pink-edge: #c94a80;
+	--pink-glow: rgb(255 134 182 / 0.4);
+}
+
+/* Miru's chunky buttons: a solid edge under the button plus an optional glow.
+   Variants set --edge and --glow; sizes and states set --lift. */
+@utility btn-chunky {
+	box-shadow:
+		0 var(--lift, 4px) 0 var(--edge, transparent),
+		var(--glow, 0 0 #0000);
+}
+
+@layer base {
+	/* landing.css was written against browser defaults, so give back what
+	   preflight takes away from plain text elements. */
+	h1, h2, h3, h4, h5, h6, p, ul, ol, dl, dd, figure, blockquote {
+		margin: revert;
+		padding: revert;
+		font-size: revert;
+		font-weight: revert;
+		list-style: revert;
+	}
+	a {
+		text-decoration: revert;
+	}
+	img, svg, video {
+		display: revert;
+		vertical-align: revert;
+		max-width: revert;
+		height: revert;
+	}
+	button:not(:disabled),
+	[role='button']:not(:disabled) {
+		cursor: pointer;
+	}
+}

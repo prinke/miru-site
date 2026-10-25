@@ -1,0 +1,1025 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import { fetchOverview, titleOf, type AniListOverview } from '../../lib/anilist';
+import { getDiscordAccount, getGuilds, guildIcon, type DiscordGuild } from '../../lib/discord';
+import * as billing from '../../lib/billing';
+import * as miru from '../../lib/miru';
+import { formatPrice, PLANS } from '../../lib/plans';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
+import SiteFooter from '../../components/SiteFooter.astro';
+import { AlertsSwitch } from '../../components/dashboard/AlertsSwitch';
+import { FeedModeSelect } from '../../components/dashboard/FeedModeSelect';
+import { MuteBell } from '../../components/dashboard/MuteBell';
+import { Alert } from '../../components/ui/alert';
+import { Badge } from '../../components/ui/badge';
+import { buttonVariants } from '../../components/ui/button';
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import { cn } from '../../lib/utils';
+
+export const prerender = false;
+
+const { user } = Astro.locals;
+if (!user) {
+	return Astro.redirect('/login/');
+}
+
+const headers = Astro.request.headers;
+
+let loadError = false;
+let botUser: miru.BotUser | null = null;
+let guilds: DiscordGuild[] | null = null;
+let feeds = new Map<string, miru.GuildFeed>();
+let memberCounts = new Map<string, number>();
+let wrapped: miru.WrappedStanding[] = [];
+let overview: AniListOverview | null = null;
+let plus = false;
+let userTiers = new Set<string>();
+let paidServers = new Set<string>();
+let subscriptions: Awaited<ReturnType<typeof billing.subscriptionsOf>> = [];
+let customerId: string | null = null;
+
+try {
+	const account = await getDiscordAccount(headers);
+	if (!account) throw new Error('No Discord account on this login');
+
+	[botUser, guilds, wrapped, userTiers, subscriptions, customerId] = await Promise.all([
+		miru.getBotUser(account.discordId),
+		getGuilds(headers, account),
+		miru.wrappedHistory(account.discordId),
+		billing.tiersOf('user', account.discordId),
+		billing.subscriptionsOf(account.discordId),
+		billing.getCustomerId(account.discordId),
+	]);
+	plus = userTiers.has('plus');
+
+	const managed = (guilds ?? []).filter((g) => g.canManage).map((g) => g.id);
+	[feeds, memberCounts, paidServers] = await Promise.all([
+		miru.feedsFor(managed),
+		miru.feedMemberCounts(managed),
+		billing.serversWithTier(managed),
+	]);
+
+	const link = botUser?.anilist;
+	if (link && !miru.isExpired(link)) {
+		overview = await fetchOverview(link.id, botUser?.alerts?.muted ?? []);
+	}
+} catch (error) {
+	console.error('[dashboard]', error);
+	loadError = true;
+}
+
+const link = botUser?.anilist ?? null;
+const expired = link ? miru.isExpired(link) : false;
+const daysLeft = link ? Math.ceil((link.expiresAt.getTime() - Date.now()) / 86_400_000) : 0;
+// Alerts are Miru+. A lapsed member's setting is kept but nothing is sent.
+const alertsOn = plus && botUser?.alerts?.enabled === true;
+const alertsPaused = !plus && botUser?.alerts?.enabled === true;
+const mutedIds = new Set(botUser?.alerts?.muted ?? []);
+const undeliverable = alertsOn && botUser?.alerts?.undeliverableAt;
+
+const guildById = new Map((guilds ?? []).map((g) => [g.id, g]));
+const joined = (botUser?.servers ?? []).map((id) => guildById.get(id) ?? { id, name: 'Unknown server', icon: null, canManage: false });
+const managedFeeds = (guilds ?? []).filter((g) => feeds.has(g.id));
+
+const airing = overview?.watching.filter((e) => e.media.nextAiringEpisode) ?? [];
+const notAiring = overview?.watching.filter((e) => !e.media.nextAiringEpisode) ?? [];
+// Muted shows that aren't on the Watching list any more still need a way to unmute.
+const watchingIds = new Set(overview?.watching.map((e) => e.media.id));
+const mutedElsewhere = overview?.muted.filter((m) => !watchingIds.has(m.id)) ?? [];
+
+const stats = overview?.stats;
+const fmt = new Intl.NumberFormat('en');
+const firstName = user.name.split(/\s/)[0];
+
+const checkout = Astro.url.searchParams.get('checkout');
+const managedGuilds = (guilds ?? []).filter((g) => g.canManage);
+const unpaidServers = managedGuilds.filter((g) => !paidServers.has(g.id));
+const dateFmt = new Intl.DateTimeFormat('en', { dateStyle: 'medium' });
+const subjectName = (sub: (typeof subscriptions)[number]) =>
+	sub.scope === 'guild' ? (guildById.get(sub.subjectId)?.name ?? 'A server') : 'You';
+
+const card = 'h-full max-[520px]:py-[22px] max-[520px]:[--card-spacing:18px]';
+const linkBtn = buttonVariants({ variant: 'link', size: 'inline' });
+const danger = buttonVariants({ variant: 'destructive', size: 'inline' });
+---
+
+<AppLayout title="Dashboard">
+	<header class="dash-head">
+		{user.image ? <img class="dash-avatar" src={user.image} alt="" width="64" height="64" /> : <span class="dash-avatar dash-avatar-fallback">{user.name.charAt(0).toUpperCase()}</span>}
+		<div>
+			<p class="kicker">Dashboard</p>
+			<h1>Hi, {firstName}</h1>
+		</div>
+	</header>
+
+	{
+		loadError && (
+			<Alert variant="destructive" className="mb-4 block">
+				<strong>Your dashboard couldn't load.</strong> Miru's database didn't respond. Refresh in a moment.
+			</Alert>
+		)
+	}
+
+	<Alert variant="destructive" className="mb-4 block" id="action-error" hidden />
+
+	{
+		!loadError && (
+			<div class="dash-grid">
+				{/* ---------- AniList ---------- */}
+				<section class="panel-account" aria-labelledby="h-account">
+					<Card className={card}>
+					<CardHeader>
+						<CardTitle as="h2" id="h-account">AniList account</CardTitle>
+						{link && (
+							<CardAction>
+								<button
+									class={danger}
+									type="button"
+									data-action="unlinkAniList"
+									data-confirm-title={`Unlink ${link.name}?`}
+									data-confirm="Alerts, the feed and list buttons will stop working until you run /link again."
+									data-confirm-action="Unlink"
+								>
+									Unlink
+								</button>
+							</CardAction>
+						)}
+					</CardHeader>
+					<CardContent>
+					{link ? (
+						<>
+							<div class="account-row">
+								<div class="al-id">
+									{link.avatar && <img src={link.avatar} alt="" width="56" height="56" />}
+									<div>
+										<a class="al-name" href={link.siteUrl} target="_blank" rel="noopener noreferrer">{link.name}</a>
+										{expired ? (
+											<Badge variant="destructive">Access expired</Badge>
+										) : daysLeft <= 30 ? (
+											<Badge variant="warning">{`Expires in ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'}`}</Badge>
+										) : (
+											<Badge variant="success">Linked</Badge>
+										)}
+									</div>
+								</div>
+								{!expired && stats && (
+									<dl class="stats">
+										<div><dt>Anime</dt><dd>{fmt.format(stats.anime.count)}</dd></div>
+										<div><dt>Episodes</dt><dd>{fmt.format(stats.anime.episodesWatched)}</dd></div>
+										<div><dt>Days watched</dt><dd>{(stats.anime.minutesWatched / 1440).toFixed(1)}</dd></div>
+										<div><dt>Chapters</dt><dd>{fmt.format(stats.manga.chaptersRead)}</dd></div>
+									</dl>
+								)}
+							</div>
+							<p class="fine">
+								{expired ? (
+									<>AniList access lasts a year. Run <code>/link</code> in Discord to reconnect.</>
+								) : (
+									<>
+										Linked {link.linkedAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.
+										{daysLeft <= 30 && <> Run <code>/link</code> in Discord to renew.</>}
+									</>
+								)}
+							</p>
+						</>
+					) : (
+						<div class="empty">
+							<p><strong>Link AniList to unlock the good stuff.</strong> Alerts, list buttons, feeds, <code>/compat</code> and <code>/wrapped</code> all need it.</p>
+							<ol class="howto">
+								<li>Run <code>/link</code> in any server or DM with Miru.</li>
+								<li>Press <b>Authorize on AniList</b> and approve.</li>
+								<li>Paste the code back with <b>Enter code</b>.</li>
+							</ol>
+							<a class={buttonVariants({ size: 'sm' })} href="/docs/commands/link/">How linking works</a>
+						</div>
+					)}
+					</CardContent>
+					</Card>
+				</section>
+
+				{/* ---------- Airing + alerts ---------- */}
+				{link && (
+					<section class="panel-airing" aria-labelledby="h-airing">
+						<Card className={card}>
+						<CardHeader>
+							<CardTitle as="h2" id="h-airing">Airing soon</CardTitle>
+							<CardDescription id="alerts-state" className="col-span-2">
+								{!plus
+									? 'What airs next on your Watching list.'
+									: alertsOn
+										? 'Miru DMs you when a new episode airs. Use the bell to mute a show.'
+										: 'Alerts are off. Turn them on to get a DM when a new episode airs.'}
+							</CardDescription>
+							<CardAction className="row-span-1">
+								{plus || alertsPaused ? (
+									<AlertsSwitch client:load enabled={alertsOn || alertsPaused} disabled={expired || (!plus && !alertsPaused)} />
+								) : (
+									<Badge variant="warning">✦ Miru+</Badge>
+								)}
+							</CardAction>
+						</CardHeader>
+						<CardContent>
+
+						{!plus && (
+							<Alert variant="default" className="mb-4 block bg-muted" role={undefined}>
+								{alertsPaused
+									? <><strong>Your episode alerts are paused.</strong> They're part of Miru+, which has ended on your account. Your settings are kept for when it's back, or switch them off here.</>
+									: <><strong>Episode alerts are part of Miru+.</strong> Get a DM the moment a new episode airs, timed your way. <a href="/premium/">See what's planned</a></>}
+							</Alert>
+						)}
+
+						{undeliverable && (
+							<Alert variant="warning" className="mb-4 block" id="undeliverable" role={undefined}>
+								<strong>Miru couldn't DM you.</strong> Share a server with Miru and turn on <b>Allow direct messages from server members</b> for it, then switch alerts off and on again.
+							</Alert>
+						)}
+
+						{expired ? (
+							<p class="muted">Reconnect AniList with <code>/link</code> to see what's airing.</p>
+						) : overview?.error ? (
+							<Alert variant="warning" className="mb-4 block" role={undefined}>{overview.error}</Alert>
+						) : airing.length === 0 ? (
+							<p class="muted">Nothing on your Watching list has an episode scheduled. Find something new with <a href="/docs/commands/season/"><code>/season</code></a>.</p>
+						) : (
+							<ul class="shows">
+								{airing.map(({ media, progress }) => {
+									const next = media.nextAiringEpisode!;
+									const behind = next.episode - 1 - progress;
+									const muted = mutedIds.has(media.id);
+									return (
+										<li class:list={['show', { 'is-muted': muted }]} style={media.coverImage.color ? `--accent:${media.coverImage.color}` : undefined}>
+											<img class="cover" src={media.coverImage.medium ?? undefined} alt="" width="46" height="66" loading="lazy" />
+											<div class="show-main">
+												<a class="show-title" href={media.siteUrl} target="_blank" rel="noopener noreferrer">{titleOf(media)}</a>
+												<span class="show-meta">
+													Ep {next.episode}{media.episodes ? ` of ${media.episodes}` : ''}
+													{' · '}
+													<time datetime={new Date(next.airingAt * 1000).toISOString()} data-countdown={next.airingAt}>
+														{new Date(next.airingAt * 1000).toUTCString()}
+													</time>
+												</span>
+												<span class="progress">
+													<span class="bar"><span style={`width:${Math.min(100, (progress / (media.episodes || next.episode)) * 100)}%`}></span></span>
+													<small>{behind > 0 ? `${behind} behind` : 'Caught up'}</small>
+												</span>
+											</div>
+											{plus && <MuteBell client:visible mediaId={media.id} title={titleOf(media)} muted={muted} />}
+										</li>
+									);
+								})}
+							</ul>
+						)}
+
+						{!expired && notAiring.length > 0 && (
+							<details class="more">
+								<summary>{notAiring.length} more on your Watching list without a scheduled episode</summary>
+								<ul class="plain">
+									{notAiring.map(({ media, progress }) => (
+										<li>
+											<a href={media.siteUrl} target="_blank" rel="noopener noreferrer">{titleOf(media)}</a>
+											<span>{progress}/{media.episodes ?? '?'}</span>
+										</li>
+									))}
+								</ul>
+							</details>
+						)}
+
+						{mutedIds.size > 0 && (
+							<div class="muted-block">
+								<div class="row-between">
+									<h3>Muted · {mutedIds.size}</h3>
+									<button class={linkBtn} type="button" data-action="clearMuted">Unmute all</button>
+								</div>
+								{mutedElsewhere.length > 0 && (
+									<ul class="chips">
+										{mutedElsewhere.map((m) => (
+											<li>
+												<a href={m.siteUrl} target="_blank" rel="noopener noreferrer">{titleOf(m)}</a>
+												<button type="button" aria-label={`Unmute ${titleOf(m)}`} data-action="setMuted" data-media={m.id} data-muted="false">×</button>
+											</li>
+										))}
+									</ul>
+								)}
+							</div>
+						)}
+
+						<p class="fine">Alerts are checked every 5 minutes. Private AniList entries never trigger alerts and aren't shown here.</p>
+						</CardContent>
+						</Card>
+					</section>
+				)}
+
+				{/* ---------- Servers ---------- */}
+				<section class="panel-servers" aria-labelledby="h-servers">
+					<Card className={card}>
+					<CardHeader>
+						<CardTitle as="h2" id="h-servers">Server feeds</CardTitle>
+					</CardHeader>
+					<CardContent>
+					{guilds === null && (
+						<Alert variant="warning" className="mb-4 block" role={undefined}>
+							Log in again so Miru can see your server names and which ones you manage.
+							<button class={cn(linkBtn, 'ml-1.5')} type="button" id="reconnect">Reconnect Discord</button>
+						</Alert>
+					)}
+
+					<h3>Feeds you've joined</h3>
+					{joined.length === 0 ? (
+						<p class="muted">You haven't joined any. Run <code>/feed</code> in a server and press <b>Join the feed</b> to share your AniList activity there.</p>
+					) : (
+						<ul class="servers">
+							{joined.map((g) => (
+								<li>
+									<span class="guild-icon">{guildIcon(g) ? <img src={guildIcon(g)} alt="" width="36" height="36" /> : g.name.charAt(0)}</span>
+									<span class="guild-name">{g.name}</span>
+									<button class={danger} type="button" data-action="leaveFeed" data-guild={g.id} data-confirm-title={`Stop sharing your activity in ${g.name}?`} data-confirm="You can join again any time from /feed in that server." data-confirm-action="Leave feed">Leave</button>
+								</li>
+							))}
+						</ul>
+					)}
+
+					{guilds !== null && (
+						<>
+							<h3>Servers you manage</h3>
+							{managedFeeds.length === 0 ? (
+								<p class="muted">None of your servers have a Miru feed. An admin can run <code>/feed</code> to add one.</p>
+							) : (
+								<ul class="servers servers-managed">
+									{managedFeeds.map((g) => {
+										const feed = feeds.get(g.id)!;
+										const count = memberCounts.get(g.id) ?? 0;
+										return (
+											<li class="managed">
+												<span class="guild-icon">{guildIcon(g) ? <img src={guildIcon(g)} alt="" width="36" height="36" /> : g.name.charAt(0)}</span>
+												<span class="guild-name">
+													{g.name}
+													<small>{count} {count === 1 ? 'member' : 'members'} sharing</small>
+												</span>
+												<div class="managed-controls">
+													<FeedModeSelect client:load guildId={g.id} guildName={g.name} mode={feed.mode} />
+													<button class={danger} type="button" data-action="disableFeed" data-guild={g.id} data-confirm-title={`Turn off the feed in ${g.name}?`} data-confirm="Members stay opted in if you set it up again." data-confirm-action="Turn off">Turn off</button>
+												</div>
+											</li>
+										);
+									})}
+								</ul>
+							)}
+							<p class="fine">To change the feed channel, run <code>/feed</code> in the server.</p>
+						</>
+					)}
+					</CardContent>
+					</Card>
+				</section>
+
+				{/* ---------- Wrapped ---------- */}
+				<section class="panel-wrapped" aria-labelledby="h-wrapped">
+					<Card className={card}>
+					<CardHeader>
+						<CardTitle as="h2" id="h-wrapped">Wrapped</CardTitle>
+					</CardHeader>
+					<CardContent>
+					{wrapped.length === 0 ? (
+						<p class="muted">Run <code>/wrapped</code> in Discord to get your year in anime on one card. Your rankings show up here.</p>
+					) : (
+						<ul class="years">
+							{wrapped.map((w) => (
+								<li>
+									<strong>{w.year}</strong>
+									<span>≈ {fmt.format(Math.round(w.effort / 60))} h</span>
+									<Badge variant="success">{w.global ? `Top ${w.global.topPercent}%` : 'Ranking soon'}</Badge>
+								</li>
+							))}
+						</ul>
+					)}
+					<p class="fine">Hours include 5 minutes per manga chapter, the same measure the rankings use.</p>
+					</CardContent>
+					</Card>
+				</section>
+
+				{/* ---------- Data ---------- */}
+				<section class="panel-data" aria-labelledby="h-data">
+					<Card className={card}>
+					<CardHeader>
+						<CardTitle as="h2" id="h-data">Your data</CardTitle>
+					</CardHeader>
+					<CardContent>
+					<p class="muted">Download everything Miru stores about you. Your AniList token is never included.</p>
+					<a class={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'mt-4')} href="/dashboard/export.json" download>Download my data</a>
+					<p class="fine"><a href="/docs/privacy/">How Miru uses your data</a></p>
+					</CardContent>
+					</Card>
+				</section>
+
+				{/* ---------- Premium ---------- */}
+				<section class="panel-premium" aria-labelledby="h-premium">
+					<Card className={cn(card, 'premium-card')}>
+					<CardHeader>
+						<CardTitle as="h2" id="h-premium"><span class="premium-mark" aria-hidden="true">✦</span> Miru Premium</CardTitle>
+						<CardDescription className="col-span-2 text-[15px] text-ink-soft">
+							Episode alerts timed your way, sequel announcements and deeper stats for you. Episode threads, a weekly digest and leaderboards for your servers.
+						</CardDescription>
+						{customerId && (
+							<CardAction className="row-span-1">
+								<form method="post" action="/api/billing/portal">
+									<button class={buttonVariants({ variant: 'outline', size: 'sm' })} type="submit">Manage billing</button>
+								</form>
+							</CardAction>
+						)}
+					</CardHeader>
+					<CardContent>
+					{checkout === 'success' && (
+						<Alert className="mb-4 block">
+							<strong>Thank you!</strong> Your plan is active. If it isn't showing yet, refresh in a few seconds. Discord can take up to a minute to notice.
+						</Alert>
+					)}
+
+					{subscriptions.length > 0 && (
+						<>
+							<h3>Your subscriptions</h3>
+							<ul class="servers">
+								{subscriptions.map((sub) => (
+									<li>
+										<span class="guild-name">
+											{PLANS[sub.tier].name}
+											<small>
+												{subjectName(sub)}
+												{sub.currentPeriodEnd && ` · ${sub.cancelAtPeriodEnd ? 'Ends' : 'Renews'} ${dateFmt.format(sub.currentPeriodEnd)}`}
+											</small>
+										</span>
+										{sub.cancelAtPeriodEnd && <Badge variant="warning">Cancelled</Badge>}
+									</li>
+								))}
+							</ul>
+						</>
+					)}
+
+					<h3>Plans</h3>
+					<ul class="servers plans">
+						{(['plus', 'supporter'] as const).map((tier) => (
+							<li>
+								<span class="guild-name">
+									{PLANS[tier].name}
+									<small>{formatPrice(PLANS[tier])}</small>
+								</span>
+								{userTiers.has(tier) ? (
+									<Badge variant="success">Active</Badge>
+								) : (
+									<form method="post" action="/api/billing/checkout">
+										<input type="hidden" name="tier" value={tier} />
+										<button class={buttonVariants({ size: 'sm' })} type="submit">Subscribe</button>
+									</form>
+								)}
+							</li>
+						))}
+						<li>
+							<span class="guild-name">
+								{PLANS.servers.name}
+								<small>{formatPrice(PLANS.servers)} per server</small>
+							</span>
+							{guilds === null ? (
+								<small class="muted">Reconnect Discord above to pick a server.</small>
+							) : unpaidServers.length === 0 ? (
+								<small class="muted">{managedGuilds.length ? 'All your servers have it.' : 'You need Manage Server in a server.'}</small>
+							) : (
+								<form method="post" action="/api/billing/checkout" class="plan-server">
+									<input type="hidden" name="tier" value="servers" />
+									<label class="sr-only" for="plan-guild">Server</label>
+									<select id="plan-guild" name="guildId" required>
+										{unpaidServers.map((g) => <option value={g.id}>{g.name}</option>)}
+									</select>
+									<button class={buttonVariants({ size: 'sm' })} type="submit">Subscribe</button>
+								</form>
+							)}
+						</li>
+					</ul>
+					<p class="fine"><a href="/premium/">What each plan includes</a></p>
+					</CardContent>
+					</Card>
+				</section>
+			</div>
+		)
+	}
+
+	<ConfirmDialog client:load />
+	<SiteFooter slot="footer" />
+</AppLayout>
+
+<style>
+	.dash-head {
+		display: flex;
+		align-items: center;
+		gap: 18px;
+		margin-bottom: 28px;
+	}
+	.dash-head h1 {
+		margin: 0;
+		font-family: var(--display);
+		font-weight: 900;
+		font-size: clamp(28px, 4vw, 40px);
+	}
+	.dash-head .kicker {
+		margin-bottom: 2px;
+	}
+	.dash-avatar {
+		width: 64px;
+		height: 64px;
+		border-radius: 50%;
+		border: 3px solid var(--surface);
+		box-shadow: var(--shadow);
+	}
+	.dash-avatar-fallback {
+		display: grid;
+		place-items: center;
+		background: var(--pink-soft);
+		color: var(--pink-deep);
+		font: 900 26px var(--display);
+	}
+
+	.dash-grid {
+		display: grid;
+		grid-template-columns: repeat(6, 1fr);
+		gap: 20px;
+	}
+	.dash-grid > section {
+		min-width: 0;
+	}
+	.panel-account,
+	.panel-airing,
+	.panel-servers {
+		grid-column: span 6;
+	}
+	.panel-wrapped {
+		grid-column: span 4;
+	}
+	.panel-data {
+		grid-column: span 2;
+	}
+	.panel-premium {
+		grid-column: span 6;
+	}
+	:global(.premium-card) {
+		background:
+			radial-gradient(60% 140% at 100% 0%, var(--pink-wash), transparent 70%),
+			var(--surface);
+	}
+	.premium-mark {
+		color: var(--pink-deep);
+	}
+
+	h3 {
+		margin: 24px 0 10px;
+		font-size: 13px;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--muted);
+	}
+	.row-between {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+	.row-between h3 {
+		margin: 0;
+	}
+	.muted {
+		color: var(--ink-soft);
+		margin: 0;
+	}
+	.fine {
+		color: var(--muted);
+		font-size: 13.5px;
+		margin: 16px 0 0;
+	}
+	.fine a,
+	.muted a {
+		color: var(--pink-deep);
+	}
+	code {
+		font-family: var(--mono);
+		font-size: 0.88em;
+		background: var(--pink-wash);
+		padding: 1px 6px;
+		border-radius: 6px;
+	}
+
+	.account-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 20px 32px;
+		flex-wrap: wrap;
+	}
+	button:disabled {
+		opacity: 0.55;
+		cursor: progress;
+	}
+
+	/* AniList */
+	.al-id {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+	}
+	.al-id img {
+		border-radius: 14px;
+	}
+	.al-id > div {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 4px;
+	}
+	.al-name {
+		font-weight: 700;
+		font-size: 18px;
+		color: var(--ink);
+		text-decoration: none;
+	}
+	.al-name:hover {
+		color: #02a9ff;
+	}
+	.stats {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(96px, 1fr));
+		gap: 8px;
+		margin: 0;
+		flex: 0 1 520px;
+	}
+	.stats div {
+		background: var(--bg);
+		border-radius: 14px;
+		padding: 10px 12px;
+	}
+	.stats dt {
+		font-size: 12px;
+		color: var(--muted);
+		font-weight: 600;
+	}
+	.stats dd {
+		margin: 2px 0 0;
+		font: 900 20px var(--display);
+	}
+	.empty p {
+		margin: 0;
+		color: var(--ink-soft);
+	}
+	.howto {
+		margin: 14px 0 18px;
+		padding-left: 20px;
+		color: var(--ink-soft);
+		display: grid;
+		gap: 4px;
+	}
+
+	.muted-block {
+		margin-top: 20px;
+		padding-top: 18px;
+		border-top: 1px dashed var(--line);
+	}
+	.chips {
+		list-style: none;
+		padding: 0;
+		margin: 12px 0 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+	.chips li {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		background: var(--bg);
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		padding: 4px 6px 4px 12px;
+		font-size: 13.5px;
+	}
+	.chips a {
+		color: var(--ink);
+		text-decoration: none;
+	}
+	.chips button {
+		border: 0;
+		background: none;
+		color: var(--muted);
+		font-size: 16px;
+		line-height: 1;
+		width: 22px;
+		height: 22px;
+		border-radius: 50%;
+		cursor: pointer;
+	}
+	.chips button:hover {
+		background: var(--pink-wash);
+		color: var(--pink-deep);
+	}
+
+	/* Airing */
+	.shows {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+		gap: 10px;
+	}
+	.show {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		padding: 10px 12px 10px 10px;
+		border-radius: 18px;
+		background: var(--bg);
+		border: 1px solid var(--line);
+		transition: opacity 0.2s;
+	}
+	.show.is-muted {
+		opacity: 0.6;
+	}
+	.cover {
+		width: 46px;
+		height: 66px;
+		object-fit: cover;
+		border-radius: 10px;
+		flex-shrink: 0;
+		background: var(--accent, var(--pink-wash));
+	}
+	.show-main {
+		flex: 1;
+		min-width: 0;
+		display: grid;
+		gap: 3px;
+	}
+	.show-title {
+		font-weight: 700;
+		color: var(--ink);
+		text-decoration: none;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.show-title:hover {
+		color: var(--pink-deep);
+	}
+	.show-meta {
+		font-size: 13.5px;
+		color: var(--ink-soft);
+	}
+	.show-meta time {
+		font-weight: 600;
+		color: var(--ink);
+	}
+	.progress {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+	.progress .bar {
+		flex: 1;
+		height: 6px;
+		border-radius: 999px;
+		background: var(--pink-wash);
+		overflow: hidden;
+	}
+	.progress .bar span {
+		display: block;
+		height: 100%;
+		border-radius: inherit;
+		background: linear-gradient(90deg, var(--lav), var(--pink));
+	}
+	.progress small {
+		font-size: 12px;
+		color: var(--muted);
+		white-space: nowrap;
+	}
+	.more {
+		margin-top: 16px;
+		font-size: 14px;
+	}
+	.more summary {
+		cursor: pointer;
+		color: var(--ink-soft);
+		font-weight: 600;
+	}
+	.plain {
+		list-style: none;
+		padding: 0;
+		margin: 10px 0 0;
+		columns: 2 260px;
+	}
+	.plain li {
+		display: flex;
+		justify-content: space-between;
+		gap: 12px;
+		padding: 5px 0;
+		border-bottom: 1px dashed var(--line);
+		break-inside: avoid;
+	}
+	.plain a {
+		color: var(--ink);
+		text-decoration: none;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.plain span {
+		color: var(--muted);
+		font-family: var(--mono);
+		font-size: 12.5px;
+	}
+
+	/* Servers */
+	.panel-servers h3:first-child,
+	.panel-servers [role='alert'] + h3 {
+		margin-top: 0;
+	}
+	.servers {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
+		gap: 10px;
+	}
+	.servers li {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 10px 14px 10px 10px;
+		border-radius: 16px;
+		background: var(--bg);
+		border: 1px solid var(--line);
+	}
+	.guild-icon {
+		width: 36px;
+		height: 36px;
+		border-radius: 12px;
+		overflow: hidden;
+		flex-shrink: 0;
+		display: grid;
+		place-items: center;
+		background: var(--lav);
+		color: #2a1d4d;
+		font: 900 16px var(--display);
+	}
+	.guild-icon img {
+		width: 100%;
+		height: 100%;
+	}
+	.guild-name {
+		flex: 1;
+		min-width: 0;
+		font-weight: 600;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.guild-name small {
+		display: block;
+		font-weight: 500;
+		font-size: 12.5px;
+		color: var(--muted);
+	}
+	.plans li {
+		flex-wrap: wrap;
+		row-gap: 10px;
+		padding-left: 16px;
+	}
+	.plans .guild-name {
+		flex: 1 1 140px;
+	}
+	.plan-server {
+		display: flex;
+		gap: 8px;
+		min-width: 0;
+	}
+	.plan-server select {
+		min-width: 0;
+		max-width: 200px;
+		padding: 6px 10px;
+		border-radius: 10px;
+		border: 1px solid var(--line);
+		background: var(--surface);
+		color: inherit;
+		font: inherit;
+		font-size: 14px;
+	}
+	.servers-managed {
+		grid-template-columns: repeat(auto-fill, minmax(min(480px, 100%), 1fr));
+	}
+	.servers li.managed {
+		flex-wrap: wrap;
+		row-gap: 10px;
+	}
+	.managed .guild-name {
+		flex: 1 1 160px;
+	}
+	.managed-controls {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		margin-left: auto;
+	}
+	/* Wrapped */
+	.years {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		gap: 8px;
+	}
+	.years li {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		padding: 12px 16px;
+		border-radius: 16px;
+		background: linear-gradient(110deg, var(--pink-wash), color-mix(in srgb, var(--lav) 22%, var(--bg)));
+	}
+	.years strong {
+		font: 900 22px var(--display);
+	}
+	.years span {
+		flex: 1;
+		color: var(--ink-soft);
+	}
+
+	@media (max-width: 900px) {
+		.panel-wrapped,
+		.panel-data {
+			grid-column: span 6;
+		}
+	}
+	@media (max-width: 520px) {
+		.stats {
+			grid-template-columns: repeat(2, 1fr);
+		}
+		.stats {
+			flex-basis: 100%;
+		}
+	}
+</style>
+
+<script>
+	import { actions } from 'astro:actions';
+	import { authClient } from '../../lib/auth-client';
+	import { confirmDialog } from '../../lib/confirm';
+	import { run } from '../../lib/dashboard';
+
+	// Countdowns in the viewer's own time zone.
+	const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+	const day = new Intl.DateTimeFormat('en', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+	function countdown(at: number) {
+		const mins = Math.round((at * 1000 - Date.now()) / 60_000);
+		if (mins <= 0) return 'airing now';
+		if (mins < 60) return rtf.format(mins, 'minute');
+		const hours = Math.floor(mins / 60);
+		if (hours < 24) return `in ${hours}h ${mins % 60}m`;
+		const days = Math.floor(hours / 24);
+		return `${day.format(at * 1000)} · in ${days}d ${hours % 24}h`;
+	}
+	function tick() {
+		document.querySelectorAll<HTMLTimeElement>('[data-countdown]').forEach((el) => {
+			el.textContent = countdown(Number(el.dataset.countdown));
+		});
+	}
+	tick();
+	setInterval(tick, 30_000);
+
+	// The alerts switch, bells and feed modes update in place (see components/dashboard).
+	// Everything else changes several parts of the page, so it reloads after saving.
+	document.querySelectorAll<HTMLButtonElement>('button[data-action]').forEach((button) => {
+		button.addEventListener('click', async () => {
+			const { action, guild, media, confirmTitle, confirm, confirmAction } = button.dataset;
+			if (confirmTitle && !(await confirmDialog({ title: confirmTitle, description: confirm!, action: confirmAction! }))) {
+				return;
+			}
+			button.disabled = true;
+			const ok = await run(() => {
+				switch (action) {
+					case 'unlinkAniList':
+						return actions.unlinkAniList();
+					case 'clearMuted':
+						return actions.clearMuted();
+					case 'setMuted':
+						return actions.setMuted({ mediaId: Number(media), muted: button.dataset.muted === 'true' });
+					case 'leaveFeed':
+						return actions.leaveFeed({ guildId: guild! });
+					case 'disableFeed':
+						return actions.disableFeed({ guildId: guild! });
+					default:
+						throw new Error(`Unknown action ${action}`);
+				}
+			});
+			button.disabled = false;
+			if (ok) window.location.reload();
+		});
+	});
+
+	// Better Auth only stores new scopes when an account is re-linked, not on a normal sign-in.
+	document.querySelector('#reconnect')?.addEventListener('click', () => {
+		authClient.linkSocial({ provider: 'discord', callbackURL: '/dashboard/', errorCallbackURL: '/dashboard/' });
+	});
+</script>

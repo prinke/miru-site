@@ -1,0 +1,26 @@
+---
+// Link previews (Discord, Twitter, Slack...). The docs get the same tags from
+// Starlight plus the `head` entries in astro.config.mjs.
+import { SITE } from '../site';
+
+interface Props {
+	title: string;
+	description: string;
+}
+
+const { title, description } = Astro.props;
+const image = new URL('/og.png', Astro.site ?? Astro.url);
+const url = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
+---
+
+<meta name="theme-color" content="#ec5f9a" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={url} />
+<meta property="og:image" content={image} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={`${SITE.name}: ${SITE.tagline}`} />
+<meta name="twitter:card" content="summary_large_image" />

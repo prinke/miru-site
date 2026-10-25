@@ -1,0 +1,51 @@
+---
+// Page shell for the marketing pages: head, nav, footer and the theme toggle.
+import '../styles/global.css';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteNav from '../components/SiteNav.astro';
+import SocialMeta from '../components/SocialMeta.astro';
+
+interface Props {
+	title: string;
+	description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<SocialMeta {title} {description} />
+		<link rel="icon" href="/favicon.ico" sizes="any" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/site.webmanifest" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Zen+Maru+Gothic:wght@500;700;900&display=swap"
+			rel="stylesheet"
+		/>
+		<script is:inline>
+			// Share the theme choice with the Starlight docs pages.
+			try {
+				const saved = localStorage.getItem('starlight-theme');
+				const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+				document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+			} catch {}
+		</script>
+	</head>
+	<body>
+		<SiteNav />
+
+		<slot />
+
+		<SiteFooter />
+	</body>
+</html>

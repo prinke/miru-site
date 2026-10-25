@@ -1,0 +1,33 @@
+---
+// Same as Starlight's SiteTitle, but the logo comes from public/ rather than an
+// imported asset, so the docs share one icon set with the landing page.
+const { siteTitle, siteTitleHref } = Astro.locals.starlightRoute;
+---
+
+<a href={siteTitleHref} class="site-title sl-flex">
+	<img src="/android-chrome-192x192.png" alt="" width="192" height="192" />
+	<span translate="no">{siteTitle}</span>
+</a>
+
+<style>
+	@layer starlight.core {
+		.site-title {
+			align-items: center;
+			gap: var(--sl-nav-gap);
+			font-size: var(--sl-text-h4);
+			font-weight: 600;
+			color: var(--sl-color-text-accent);
+			text-decoration: none;
+			white-space: nowrap;
+			min-width: 0;
+		}
+		span {
+			overflow: hidden;
+		}
+		img {
+			height: calc(var(--sl-nav-height) - 2 * var(--sl-nav-pad-y));
+			width: auto;
+			object-fit: contain;
+		}
+	}
+</style>

@@ -1,0 +1,51 @@
+---
+title: /wrapped
+description: Your year in anime and manga as a shareable image.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+```
+/wrapped [year]
+```
+
+Your year in anime and manga, as a PNG card you can share. Needs a [linked account](/docs/commands/link/). The reply is public.
+
+## Options
+
+`year` is 2010 or later. It defaults to the current year.
+
+## What counts
+
+A title counts towards a year if you **started or finished** it that year, based on the start and finish dates on your AniList entries.
+
+## The card
+
+- Estimated hours watched, marked "≈" because a show you started the year before counts in full
+- Anime and manga counts
+- Episodes and chapters
+- Titles completed
+- Mean score
+- Top 3 genres and top studio
+- Your busiest month
+- Your favourite
+- A "hot take": a title where your score differs from the average by 15 points or more
+- A strip of covers
+- Your AniList profile colour
+
+## Rankings
+
+The card can show where you rank:
+
+- **Globally**: "Top X%", once 5 or more people have run Wrapped for that year.
+- **In this server**: once 3 or more members who [joined the feed](/docs/commands/feed/#joining-and-leaving) have run Wrapped. Server install only.
+
+Rankings use watch minutes plus 5 minutes per manga chapter.
+
+<Aside>
+Private entries count towards your totals, but they're never named on the card.
+</Aside>
+
+<Aside type="tip" title="Empty card?">
+Wrapped relies on start and finish dates. Entries edited outside AniList's website may not have them. You can add the dates on AniList and run `/wrapped` again.
+</Aside>

@@ -1,0 +1,375 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Petals from '../components/landing/Petals.astro';
+import { PremiumFaq } from '../components/PremiumFaq';
+import { Badge } from '../components/ui/badge';
+import { buttonVariants } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
+import { cn } from '../lib/utils';
+import { formatPrice, PLANS, type Tier } from '../lib/plans';
+import { INVITE } from '../site';
+
+const tiers: { id: Tier; icon: string; name: string; who: string; featured?: boolean; features: string[] }[] = [
+	{
+		id: 'plus',
+		icon: '🎀',
+		name: 'Miru+',
+		who: 'For you. Works everywhere you use Miru.',
+		features: [
+			'Episode alerts: a DM the moment a new episode airs, with a button to mark it watched',
+			'Alert timing: match your streaming site, quiet hours, or one daily digest',
+			'Alerts when a sequel is announced or something on your Planning list starts',
+			'<code>/stats</code>: genres, studios, scoring habits and more',
+			'A shareable <code>/profile</code> card with extra themes',
+			'Wrapped any time of year, plus a side-by-side Wrapped with a friend',
+			'More <code>/recommend</code> filters, like short shows or your streaming service',
+		],
+	},
+	{
+		id: 'servers',
+		icon: '🏡',
+		name: 'Miru for Servers',
+		who: 'For admins. Unlocks for everyone in the server.',
+		featured: true,
+		features: [
+			'A discussion thread for every new episode, with an optional role ping',
+			'A weekly digest post and server leaderboards',
+			'Anime club tools: pick-of-the-week votes and watch-along events',
+			'Feed filters and separate anime and manga channels',
+			'Server Wrapped: your community’s year on one card',
+			'Quiz nights built from the shows your server watches',
+		],
+	},
+	{
+		id: 'supporter',
+		icon: '💝',
+		name: 'Supporter',
+		who: 'For anyone who wants to chip in.',
+		features: [
+			'A supporter badge on your feed posts, <code>/compat</code> results and cards',
+			'Exclusive card themes',
+			'A custom accent colour on your embeds',
+			'Our heartfelt thanks for keeping Miru running',
+		],
+	},
+];
+---
+
+<SiteLayout
+	title="Miru Premium · More Miru for you and your server"
+	description="Miru Premium is coming: smarter alerts and deeper stats with Miru+, episode threads and leaderboards with Miru for Servers, and a Supporter tier."
+>
+	<main>
+		<section class="hero premium-hero">
+			<Petals />
+			<div class="hero-kanji" aria-hidden="true">見る</div>
+			<div class="wrap premium-hero-inner">
+				<div class="rise" style="--d:0">
+					<Badge variant="warning" className="px-3 text-[12px] tracking-[0.08em] uppercase">Coming soon</Badge>
+				</div>
+				<h1 class="rise" style="--d:1">More Miru, <em>for you</em><br />and your server.</h1>
+				<p class="lede rise" style="--d:2">
+					Miru Premium adds smarter alerts and deeper stats for you, and turns your server into an anime club.
+				</p>
+				<div class="hero-ctas rise" style="--d:3">
+					<a class={buttonVariants()} href="#plans">See the plans</a>
+					<a class={buttonVariants({ variant: 'outline' })} href="/docs/getting-started/">Get started</a>
+				</div>
+			</div>
+		</section>
+
+		<!-- Plans -->
+		<section class="section" id="plans">
+			<div class="wrap">
+				<div class="section-head center">
+					<p class="kicker">Plans</p>
+					<h2>Pick what fits</h2>
+					<p class="sub">Billed monthly. Cancel any time from your dashboard, and keep your perks until the period ends.</p>
+				</div>
+
+				<div class="tiers">
+					{
+						tiers.map((tier) => (
+							<Card className={cn('tier gap-0 py-0', tier.featured && 'border-2 border-pink-soft')} id={tier.id}>
+								<CardHeader className="pt-[30px]">
+									<div class="tier-top">
+										<div class="plan-icon" aria-hidden="true">{tier.icon}</div>
+										{tier.featured && <Badge>For communities</Badge>}
+									</div>
+									<CardTitle as="h3" className="text-[26px]">{tier.name}</CardTitle>
+									<CardDescription className="text-[15px] text-ink-soft">{tier.who}</CardDescription>
+								</CardHeader>
+								<CardContent className="flex-1">
+									<p class="tier-price">{formatPrice(PLANS[tier.id])}</p>
+									<ul class="tier-list">
+										{tier.features.map((f) => <li set:html={f} />)}
+									</ul>
+								</CardContent>
+								<CardFooter className="pb-[30px]">
+									{PLANS[tier.id].scope === 'guild' ? (
+										// A server plan needs a server picked, which the dashboard can list.
+										<a class={buttonVariants({ variant: tier.featured ? 'default' : 'outline' })} href="/dashboard/#h-premium">
+											Choose a server
+										</a>
+									) : (
+										<form method="post" action="/api/billing/checkout">
+											<input type="hidden" name="tier" value={tier.id} />
+											<button class={buttonVariants({ variant: tier.featured ? 'default' : 'outline' })} type="submit">
+												Get {tier.name}
+											</button>
+										</form>
+									)}
+								</CardFooter>
+							</Card>
+						))
+					}
+				</div>
+			</div>
+		</section>
+
+		<!-- Spotlight -->
+		<section class="section steps-section">
+			<div class="wrap">
+				<div class="section-head center">
+					<p class="kicker">A peek at what's planned</p>
+					<h2>Made for the way you watch</h2>
+				</div>
+
+				<div class="bento">
+					<article class="tile spot">
+						<span class="chip">Miru for Servers</span>
+						<h3>A thread for every episode</h3>
+						<p>When a show airs, Miru opens a spoiler-safe discussion thread and pings the people watching it.</p>
+						<div class="thread" aria-hidden="true">
+							<div class="thread-head"><span class="thread-hash">#</span> anime-chat</div>
+							<div class="thread-row">
+								<span class="thread-icon">🧵</span>
+								<div>
+									<b>Frieren · Episode 12 discussion</b>
+									<small><span class="mention">@Frieren watchers</span> · 14 messages</small>
+								</div>
+							</div>
+							<div class="thread-row">
+								<span class="thread-icon">🧵</span>
+								<div>
+									<b>The Apothecary Diaries · Episode 9 discussion</b>
+									<small><span class="mention">@Apothecary watchers</span> · 6 messages</small>
+								</div>
+							</div>
+						</div>
+					</article>
+
+					<article class="tile spot">
+						<span class="chip">Miru+</span>
+						<h3>Hear about sequels first</h3>
+						<p>A DM when a show you finished gets a new season, or something on your Planning list starts airing.</p>
+						<div class="dm" aria-hidden="true">
+							<div class="dm-line"><b>Season 2 announced</b> · you completed season 1</div>
+							<div class="dm-btns">
+								<span class="dbtn green">Add to Planning</span>
+								<span class="dbtn">View on AniList</span>
+							</div>
+						</div>
+					</article>
+
+					<article class="tile spot">
+						<span class="chip">Miru for Servers</span>
+						<h3>A weekly digest</h3>
+						<p>Every week, a post with what the server watched, who rated the most and the longest streaks.</p>
+						<ul class="feed" aria-hidden="true">
+							<li><span class="av a1"></span><p><b>214 episodes</b> watched this week</p></li>
+							<li><span class="av a2"></span><p><b>kei</b> is on a <em>12-day streak</em></p></li>
+							<li><span class="av a3"></span><p>Most watched: <em>Witch Hat Atelier</em></p></li>
+						</ul>
+					</article>
+
+					<article class="tile spot tile-wrapped">
+						<span class="chip">Miru+</span>
+						<h3>Your stats, any time</h3>
+						<p>Genres, studios, how you score compared to everyone else, and a profile card to share.</p>
+						<div class="wrapped" aria-hidden="true">
+							<small>Your stats</small>
+							<strong>Drama</strong>
+							<div class="w-stats">
+								<span><b>+1.2</b> vs avg</span>
+								<span><b>Madhouse</b></span>
+							</div>
+							<div class="w-strip"><i></i><i></i><i></i><i></i><i></i></div>
+						</div>
+					</article>
+				</div>
+			</div>
+		</section>
+
+		<!-- FAQ -->
+		<section class="section faq-section">
+			<div class="wrap faq-wrap">
+				<div class="section-head center">
+					<p class="kicker">Questions</p>
+					<h2>Good to know</h2>
+				</div>
+				<PremiumFaq client:visible />
+			</div>
+		</section>
+
+		<!-- CTA -->
+		<section class="cta">
+			<div class="wrap cta-inner">
+				<Petals />
+				<h2>There's plenty to do in the meantime.</h2>
+				<p>Search, scene search, list tracking, Wrapped and more are already here.</p>
+				<div class="hero-ctas">
+					<a class={buttonVariants({ variant: 'light' })} href={INVITE.any} target="_blank" rel="noopener noreferrer">Add to Discord</a>
+					<a class={buttonVariants({ variant: 'light-outline' })} href="/docs/getting-started/">Read the guide</a>
+				</div>
+			</div>
+		</section>
+	</main>
+</SiteLayout>
+
+<style>
+	.premium-hero {
+		padding-bottom: 88px;
+	}
+	.premium-hero-inner {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+	}
+	.premium-hero h1 {
+		margin-top: 20px;
+	}
+	.premium-hero .lede {
+		margin-inline: auto;
+	}
+	.premium-hero .hero-ctas {
+		justify-content: center;
+	}
+
+	/* Plans */
+	.tiers {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 24px;
+		align-items: stretch;
+	}
+	.tier-top {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 12px;
+		margin-bottom: 14px;
+	}
+	.tier-price {
+		margin: 18px 0 4px;
+		font-family: var(--mono);
+		font-size: 13px;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: var(--muted);
+	}
+	.tier-list {
+		list-style: none;
+		padding: 0;
+		margin: 18px 0 28px;
+		display: grid;
+		gap: 10px;
+		font-size: 15.5px;
+	}
+	.tier-list li {
+		position: relative;
+		padding-left: 28px;
+	}
+	.tier-list :global(code) {
+		white-space: nowrap;
+	}
+	.tier-list li::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0.3em;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		background: var(--pink-soft)
+			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d6417f' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12 4 4 8-8'/%3E%3C/svg%3E")
+			center / 12px no-repeat;
+	}
+
+	/* Spotlight */
+	.spot {
+		grid-column: span 3;
+	}
+	.thread {
+		margin-top: 22px;
+		background: #313338;
+		color: #dbdee1;
+		border-radius: 16px;
+		padding: 12px 14px 14px;
+		font-size: 14px;
+	}
+	.thread-head {
+		color: #949ba4;
+		font-weight: 600;
+		margin-bottom: 8px;
+	}
+	.thread-hash {
+		font-size: 17px;
+		margin-right: 2px;
+	}
+	.thread-row {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 8px 10px;
+		border-radius: 10px;
+		background: #2b2d31;
+	}
+	.thread-row + .thread-row {
+		margin-top: 6px;
+	}
+	.thread-row b {
+		display: block;
+		color: #f2f3f5;
+		font-weight: 600;
+	}
+	.thread-row small {
+		color: #949ba4;
+		font-size: 12.5px;
+	}
+	.thread-icon {
+		font-size: 18px;
+	}
+	.mention {
+		color: #c9cdfb;
+		background: rgb(88 101 242 / 0.3);
+		border-radius: 4px;
+		padding: 0 3px;
+	}
+
+	/* FAQ */
+	.faq-section {
+		padding-bottom: 0;
+	}
+	.faq-wrap {
+		max-width: 760px;
+	}
+
+	.cta {
+		padding-top: 104px;
+	}
+
+	@media (max-width: 1000px) {
+		.tiers {
+			grid-template-columns: 1fr;
+			max-width: 560px;
+			margin-inline: auto;
+		}
+		.spot {
+			grid-column: span 6;
+		}
+	}
+</style>

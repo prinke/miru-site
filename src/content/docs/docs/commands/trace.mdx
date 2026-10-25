@@ -1,0 +1,54 @@
+---
+title: /trace
+description: Find which anime, episode and timestamp a screenshot comes from.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+```
+/trace [image] [url]
+```
+
+Find which anime, episode and timestamp a screenshot comes from. Miru uses [trace.moe](https://trace.moe) for this. No AniList account needed. The reply is public.
+
+## Using `/trace`
+
+Give Miru one of:
+
+- `image`: a screenshot, GIF or short clip, up to **25 MB**
+- `url`: a link to an image, starting with `https://`
+
+## What anime is this?
+
+You can also search from any message without typing a command:
+
+1. Right-click the message (or long-press on mobile).
+2. Choose **Apps → What anime is this?**
+
+Miru uses the message's first image or video attachment, or an embedded image (from a link or a Tenor GIF).
+
+## Results
+
+The result shows the title, episode, timestamp, format, year and match percentage, a preview frame, and up to 3 **Other possibilities**.
+
+| Similarity | What Miru shows |
+| --- | --- |
+| 90% or more | **Scene found** |
+| 80–90% | **Possible match — low confidence** |
+| Below 80% | No convincing match |
+
+Buttons under the result:
+
+- **Preview clip**
+- **Open on AniList**
+- [List buttons](/docs/features/list-buttons/), if you've linked AniList
+
+<Aside type="tip">
+Uncropped, unfiltered screenshots straight from an episode work best. Edited images, memes and fan art usually won't match.
+</Aside>
+
+## Good to know
+
+- Adult titles never get a preview frame or clip.
+- trace.moe has a monthly search quota. The footer warns you when fewer than 20 searches are left.
+- The image you submit is sent to trace.moe. See [Privacy](/docs/privacy/#third-parties).

@@ -1,0 +1,48 @@
+---
+title: Episode alerts
+description: Get a DM the moment a new episode of something you're watching airs.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+Miru can DM you when a new episode of something on your **Watching** or **Rewatching** list airs. Episode alerts are part of **[Miru+](/premium/)**.
+
+## Turning them on
+
+<Steps>
+
+1. [Link AniList](/docs/commands/link/) if you haven't already.
+
+2. Make sure you share a server with Miru and have **Allow direct messages from server members** turned on for it.
+
+3. Run [`/alerts`](/docs/commands/alerts/) and press **Alerts: on**. Miru sends a test DM to check it can reach you.
+
+</Steps>
+
+`/alerts` also shows the next episodes coming up, and lets you choose [when alerts arrive](/docs/commands/alerts/#when-alerts-arrive): a delay, quiet hours or a daily digest.
+
+## The alert DM
+
+Each DM says **New episode out now** (or **Final episode out now**) and lets you know if you're behind. It has three buttons:
+
+- **Mark episode N watched**: logs it on AniList.
+- **Mute this show**: stops alerts for that show. Unmute from `/alerts`.
+- **Watch on &lt;site&gt;**: the first legal stream AniList knows of.
+
+These buttons keep working even after Miru restarts.
+
+## Timing
+
+Miru checks for new episodes every 5 minutes, so an alert can arrive up to about 5 minutes after the episode airs. If Miru was offline for a while, it catches up on episodes from up to 3 hours back.
+
+<Aside type="caution" title="Private entries">
+Entries marked **private** on AniList don't trigger alerts.
+</Aside>
+
+## Not getting alerts?
+
+- Run `/alerts` to check alerts are on, and that your Miru+ is active.
+- Check you share a server with Miru and allow DMs from its members.
+- Check the show is on **Watching** or **Rewatching**, not Planning or Paused.
+- Check the entry isn't private on AniList.
+- Check you haven't muted the show.

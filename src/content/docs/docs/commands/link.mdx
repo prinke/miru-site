@@ -1,0 +1,58 @@
+---
+title: /link and /unlink
+description: Connect your AniList account to Miru, or disconnect it.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+```
+/link
+/unlink
+```
+
+Linking AniList unlocks your lists, progress logging, episode alerts (Miru+), `/compat`, `/recommend`, `/wrapped` and the server feed. Both replies are private.
+
+## `/link`
+
+<Steps>
+
+1. Run `/link`. Miru replies privately (only you can see it) with instructions and two buttons.
+
+2. Press **Authorize on AniList**, sign in, and approve Miru.
+
+3. AniList shows a code on screen. Copy it.
+
+4. Back in Discord, press **Enter code** and paste the code into the **Authorization code** box.
+
+5. Miru confirms with your AniList name, avatar, anime and manga counts, and the date your access expires.
+
+</Steps>
+
+<Aside type="caution">
+Never paste the code into a channel. It's private.
+</Aside>
+
+### Good to know
+
+- You have **5 minutes** to press **Enter code**, then **10 minutes** to submit the code.
+- The code is single-use and expires quickly. If AniList rejects it, run `/link` again for a fresh one.
+- Access lasts **one year**. AniList doesn't offer refresh tokens, so after a year Miru will ask you to run `/link` again.
+- Running `/link` while you're already linked just shows your current account.
+- Linking on its own doesn't read or change your lists.
+
+## `/unlink`
+
+`/unlink` deletes your stored AniList token and the link to your account.
+
+<Aside>
+AniList has no way for apps to revoke their own access. To be completely sure, also remove Miru at **anilist.co → Settings → Apps**.
+</Aside>
+
+## Error messages
+
+| Message | What it means |
+| --- | --- |
+| "AniList rejected that code…" | The code was wrong, already used or expired. Run `/link` again. |
+| "Your AniList access has expired. Run `/link`…" | Your one-year access ran out. |
+| "Your AniList link is no longer valid…" | Miru's access was revoked on AniList. Run `/link` again. |
+| "Account linking is not configured on this bot yet." | A self-hosted copy of Miru is missing its AniList settings. |

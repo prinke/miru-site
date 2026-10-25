@@ -1,0 +1,47 @@
+/* Login and dashboard pages. Builds on the tokens in landing.css. */
+
+body {
+	background: var(--bg);
+	color: var(--ink);
+}
+
+.app-main {
+	padding-block: 64px;
+}
+
+.app-card {
+	max-width: 440px;
+	margin-inline: auto;
+	padding: 40px 32px;
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	text-align: center;
+}
+
+.app-card h1 {
+	font-family: var(--display);
+	font-size: 1.75rem;
+	margin: 0 0 8px;
+}
+
+.app-card p {
+	color: var(--ink-soft);
+	margin: 0 0 24px;
+}
+
+.app-error {
+	color: var(--pink-deep);
+	min-height: 1.5em;
+	margin-top: 16px;
+}
+
+.app-avatar {
+	width: 72px;
+	height: 72px;
+	border-radius: 50%;
+	margin: 0 auto 16px;
+	display: block;
+	background: var(--pink-wash);
+}

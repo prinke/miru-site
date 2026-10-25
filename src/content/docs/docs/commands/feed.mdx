@@ -1,0 +1,40 @@
+---
+title: /feed
+description: Set up and join the server activity feed.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+```
+/feed
+```
+
+The feed posts members' AniList activity in a channel. For what the posts look like and how it works, see [Server feed](/docs/features/server-feed/).
+
+`/feed` opens a settings panel that only you can see. It shows whether the feed is on, its channel and mode, how many members have joined, and whether you have.
+
+<Aside type="note" title="Server install only">
+`/feed` only exists when Miru is [installed to the server](/docs/getting-started/#1-add-miru). It won't appear if you only added Miru as a personal app.
+</Aside>
+
+## Joining and leaving
+
+Press **Join the feed** to share *your* AniList activity in this server, or **Leave the feed** to stop. Joining needs a [linked account](/docs/commands/link/).
+
+Nobody is ever added automatically. Joining also includes you in [`/recommend for:This server`](/docs/commands/recommend/#for-this-server) and the server ranking on [`/wrapped`](/docs/commands/wrapped/#rankings).
+
+## Settings for admins
+
+Members with **Manage Server** also see:
+
+- **A channel picker.** Choosing a text or announcement channel turns the feed on there, or moves it. Miru needs **View Channel**, **Send Messages** and **Embed Links** in that channel, and says so if it's missing any.
+- **A mode menu**, once the feed is on:
+
+  | Mode | Posts |
+  | --- | --- |
+  | **Highlights** (default) | Finishes, drops, rewatch and reread completions, and new starts |
+  | **Everything** | Every episode and chapter |
+
+- **Turn the feed off.** Members who joined stay joined, so turning it back on picks up where it left off.
+
+Each change updates the panel straight away. The panel keeps working until you dismiss it.

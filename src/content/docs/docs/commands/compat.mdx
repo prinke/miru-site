@@ -1,0 +1,50 @@
+---
+title: /compat
+description: See how compatible your anime or manga taste is with someone else's.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+```
+/compat [user] [username] [type]
+```
+
+Compare your taste with someone else's. Needs a [linked account](/docs/commands/link/). The reply is public.
+
+## Options
+
+| Option | What it does |
+| --- | --- |
+| `user` | A Discord member who has linked AniList |
+| `username` | Any AniList username |
+| `type` | **Anime** (default) or **Manga** |
+
+Give either `user` or `username`.
+
+## The result
+
+- A compatibility percentage, with a bar and a verdict
+- Genres you share
+- **You both loved**: titles you both rated highly
+- **Where you disagree**: titles you rated very differently
+- **X should try**: picks for each of you from the other's favourites, flagged if they're already on that person's Planning list
+
+| Score | Verdict |
+| --- | --- |
+| 85% and up | *Taste twins* |
+| 70% and up | *Great match* |
+| 55% and up | *Good match* |
+| 40% and up | *Some common ground* |
+| Below 40% | *Opposites attract?* |
+
+## How it's calculated
+
+The percentage blends three things:
+
+- **Score agreement** on titles you've both scored. This needs at least 5 titles you've both scored.
+- **Genre similarity** across your lists.
+- **Overlap** between your lists.
+
+<Aside>
+Because the reply is posted in the channel, `/compat` only uses public AniList data. Private entries are left out, and private profiles can't be compared.
+</Aside>

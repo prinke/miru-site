@@ -1,0 +1,109 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Petals from '../components/landing/Petals.astro';
+import { buttonVariants } from '../components/ui/button';
+import { SITE } from '../site';
+---
+
+<SiteLayout title={`Page not found · ${SITE.name}`} description="This page doesn't exist. Head back to Miru or browse the docs.">
+	<main class="hero lost">
+		<Petals />
+		<div class="hero-kanji" aria-hidden="true">迷子</div>
+		<div class="wrap lost-inner">
+			<p class="lost-code rise" style="--d:1" aria-hidden="true">
+				<span>4</span>
+				<img src="/android-chrome-512x512.png" alt="" width="160" height="160" />
+				<span>4</span>
+			</p>
+			<p class="kicker rise" style="--d:2">迷子 · maigo · lost</p>
+			<h1 class="rise" style="--d:2">This episode <em>never aired</em>.</h1>
+			<p class="lede rise" style="--d:3">The page you're looking for was moved, dropped or never existed. Here's somewhere better to be.</p>
+			<div class="hero-ctas rise" style="--d:4">
+				<a class={buttonVariants()} href="/">Back to Miru</a>
+				<a class={buttonVariants({ variant: 'outline' })} href="/docs/getting-started/">Read the docs</a>
+			</div>
+			<nav class="lost-links rise" style="--d:5" aria-label="Popular pages">
+				<a href="/docs/commands/">Commands</a>
+				<a href="/docs/faq/">FAQ</a>
+				<a href="/premium/">Premium</a>
+				<a href="/dashboard/">Dashboard</a>
+			</nav>
+		</div>
+	</main>
+</SiteLayout>
+
+<style>
+	.lost {
+		min-height: calc(100vh - 68px);
+		display: grid;
+		align-items: center;
+	}
+	.lost-inner {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+	}
+	.lost-code {
+		display: flex;
+		align-items: center;
+		gap: clamp(4px, 1.5vw, 16px);
+		margin: 0 0 20px;
+		font-family: var(--display);
+		font-weight: 900;
+		font-size: clamp(110px, 20vw, 200px);
+		line-height: 1;
+		color: var(--pink);
+	}
+	.lost-code img {
+		width: 0.8em;
+		height: 0.8em;
+		border-radius: 0.2em;
+		background: var(--surface);
+		box-shadow: var(--shadow);
+		transform: rotate(-8deg);
+		animation: lost-bob 4s ease-in-out infinite;
+	}
+	.lost h1 {
+		font-size: clamp(34px, 5vw, 56px);
+		font-weight: 900;
+	}
+	.lost .lede {
+		margin-inline: auto;
+	}
+	.lost .hero-ctas {
+		justify-content: center;
+	}
+	.lost-links {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 6px;
+		margin-top: 28px;
+	}
+	.lost-links a {
+		color: var(--ink-soft);
+		text-decoration: none;
+		font-weight: 600;
+		font-size: 15px;
+		padding: 8px 14px;
+		border-radius: 999px;
+		transition: background-color 0.2s, color 0.2s;
+	}
+	.lost-links a:hover {
+		background: var(--pink-wash);
+		color: var(--ink);
+	}
+	@keyframes lost-bob {
+		50% {
+			transform: rotate(-3deg) translateY(-10px);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.lost-code img {
+			animation: none;
+		}
+	}
+</style>

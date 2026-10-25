@@ -1,0 +1,52 @@
+---
+title: List buttons
+description: Add, remove, log and rate titles right from search results.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+When you've [linked AniList](/docs/commands/link/), buttons appear under results from [`/anime`](/docs/commands/anime/), [`/manga`](/docs/commands/manga/), [`/season`](/docs/commands/season/) show cards and [`/trace`](/docs/commands/trace/). They change depending on whether the title is already on your list.
+
+| If the title is… | Buttons |
+| --- | --- |
+| Not on your list | **Add to list** |
+| On your list | **Remove from &lt;status&gt;** · **+1 ep · 3/12** (or **+1 ch**) · **Rate** (or **★ 8** if you've scored it) |
+
+## Add to list
+
+Opens a private prompt asking which list to add the title to. The prompt lasts **1 minute**.
+
+## Remove
+
+Asks you to confirm with **Remove** or **Cancel**, because AniList has no undo. Your progress and score for that title are lost.
+
+## +1
+
+Adds one episode (or chapter). The label doubles as a progress readout, so **+1 ep · 3/12** means you're on 3 of 12.
+
+## Rate
+
+Opens a box: "Score out of 10 (0 clears it)". Whole numbers like `7` and decimals like `8.5` both work.
+
+## List statuses
+
+Miru uses AniList's list names, which differ between anime and manga:
+
+| Anime | Manga |
+| --- | --- |
+| Watching | Reading |
+| Planning | Planning |
+| Completed | Completed |
+| Paused | Paused |
+| Dropped | Dropped |
+| Rewatching | Rereading |
+
+## Data sources
+
+AniList is Miru's main data source. If AniList can't be reached, searches fall back to **Jikan** (MyAnimeList), and the result's footer says so.
+
+List buttons still work on those results, because Miru matches MyAnimeList entries to AniList.
+
+<Aside>
+Account features (lists, progress, alerts and so on) need AniList itself and don't fall back.
+</Aside>

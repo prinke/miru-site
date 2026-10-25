@@ -1,0 +1,21 @@
+---
+// Same as Starlight's SocialIcons, but opens links in a new tab.
+import { Icon } from '@astrojs/starlight/components';
+import { SITE } from '../site';
+---
+
+<a href={SITE.source} rel="me noopener noreferrer" target="_blank" class="sl-flex">
+	<span class="sr-only">GitHub</span>
+	<Icon name="github" />
+</a>
+
+<style>
+	a {
+		color: var(--sl-color-text-accent);
+		padding: 0.5em;
+		margin: -0.5em;
+	}
+	a:hover {
+		color: var(--sl-color-white);
+	}
+</style>

@@ -1,0 +1,69 @@
+---
+title: Architecture
+description: How Miru's public code is organised.
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+
+An overview of the public code for contributors. Miru runs on Node.js 18+, discord.js v14 and MongoDB.
+
+<FileTree>
+
+- src/
+  - index.js client setup, interaction routing, startup and shutdown
+  - deploy-commands.js registers slash and context-menu commands
+  - commands/ one file per command
+  - jobs/
+    - activity-feed.js every 3 min: server feed posts
+  - lib/
+    - anilist.js public AniList GraphQL client (cached 10 min, shared rate limiter)
+    - anilist-auth.js OAuth pin flow and per-user queries (never cached)
+    - jikan.js Jikan fallback client (cached 10 min)
+    - media-search.js AniList → Jikan fallback logic
+    - trace-moe.js scene search (queued, cached 1 h)
+    - token-vault.js AES-GCM token encryption
+    - db.js
+    - users.js
+    - guilds.js
+    - state.js
+    - list-controls.js Add / Remove / +1 / Rate buttons
+    - episode-alerts.js
+    - activity-feed.js
+    - compat.js
+    - recommend.js
+    - wrapped.js
+    - wrapped-card.js
+    - scheduler.js runs jobs; skips a tick if the previous one is still running
+    - premium.js loads the optional private premium module if present
+
+</FileTree>
+
+## Commands
+
+Each file in `commands/` exports `data` and `execute`, plus optional `autocomplete` and `components` handlers.
+
+## Buttons that survive restarts
+
+Buttons that have to keep working after a restart, like those on alert DMs, use custom IDs such as `alert_watched:<mediaId>:<episode>`. The prefix routes them to a handler. Other controls use short-lived in-memory collectors.
+
+## Background jobs
+
+- **Alerts** cost about 2 AniList requests per tick no matter how many users there are: one for "what aired" and one for "who's watching it".
+- **The feed** reads activity for all members of all servers in one query.
+- Both jobs keep a cursor in the `state` collection, so restarts neither repeat nor skip anything.
+
+## Rate limits
+
+AniList allows about 30 requests a minute (down from a published 90). All AniList calls share one limiter.
+
+## Database
+
+MongoDB collections: `users`, `guilds`, `state`, `notifications` (30-day TTL) and `wrapped`.
+
+## Premium module
+
+The public code loads an optional `premium/` module if it exists. It's gitignored and kept private, so the public bot is complete without it.
+
+## Rendering
+
+Wrapped cards are drawn with `@napi-rs/canvas` using the bundled Inter font.

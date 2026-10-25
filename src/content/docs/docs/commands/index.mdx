@@ -1,0 +1,56 @@
+---
+title: Commands
+description: Every Miru command at a glance.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Syntax is written as `/command <required> [optional]`. Unless a page says otherwise, every command works in servers, DMs with the bot and group DMs, for both [install types](/docs/getting-started/#1-add-miru).
+
+## Search
+
+No AniList account needed.
+
+| Command | What it does |
+| --- | --- |
+| [`/anime <query>`](/docs/commands/anime/) | Search anime by title |
+| [`/manga <query>`](/docs/commands/manga/) | Search manga by title |
+| [`/character <query>`](/docs/commands/character/) | Search characters by name |
+| [`/season [season] [year] [sort] [format]`](/docs/commands/season/) | Browse a season's anime chart |
+| [`/trace [image] [url]`](/docs/commands/trace/) | Find the anime, episode and timestamp of a screenshot |
+| [*What anime is this?*](/docs/commands/trace/#what-anime-is-this) | Same as `/trace`, from a message's **Apps** menu |
+| [`/ping`](/docs/commands/ping/) | Check that Miru is online |
+
+## AniList account
+
+Run [`/link`](/docs/commands/link/) first.
+
+| Command | What it does |
+| --- | --- |
+| [`/link`](/docs/commands/link/) | Connect your AniList account |
+| [`/unlink`](/docs/commands/link/#unlink) | Disconnect it and delete the stored token |
+| [`/animelist [status]`](/docs/commands/animelist/) | Browse your anime list |
+| [`/mangalist [status]`](/docs/commands/animelist/) | Browse your manga list |
+| [`/progress <title> [episode] [score]`](/docs/commands/progress/) | Log an episode or chapter, or rate something |
+| [`/alerts`](/docs/commands/alerts/) | DMs when new episodes air, timed your way (**Miru+**) |
+| [`/compat [user] [username] [type]`](/docs/commands/compat/) | Compare your taste with someone else's |
+| [`/recommend [for] [type] [genre]`](/docs/commands/recommend/) | Picks for you or your whole server |
+| [`/wrapped [year]`](/docs/commands/wrapped/) | Your year in anime and manga as an image |
+
+## Server feed
+
+Server install only.
+
+| Command | What it does |
+| --- | --- |
+| [`/feed`](/docs/commands/feed/) | Join or leave the feed; admins choose the channel and mode, or turn it off |
+
+## Who can see the reply
+
+| Private (only you see it) | Public (posted in the channel) |
+| --- | --- |
+| `/link`, `/unlink`, `/progress`, `/alerts`, `/feed`, all error messages, Add/Remove prompts | Searches, `/season`, `/trace`, `/animelist`, `/mangalist`, `/compat`, `/recommend`, `/wrapped` |
+
+<Aside title="Buttons and menus">
+Interactive controls stay active for a few minutes (listed on each page), then disappear. Only the person who ran the command can use them, except the Planning menu on [`/recommend`](/docs/commands/recommend/).
+</Aside>

@@ -1,0 +1,366 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Petals from '../components/landing/Petals.astro';
+import DiscordCard from '../components/landing/DiscordCard.astro';
+import { buttonVariants } from '../components/ui/button';
+import { Card } from '../components/ui/card';
+import { cn } from '../lib/utils';
+import { INVITE, SITE } from '../site';
+
+const commands = [
+	['anime', 'Search anime'],
+	['manga', 'Search manga'],
+	['character', 'Find a character'],
+	['season', 'Seasonal charts'],
+	['trace', 'Scene search'],
+	['link', 'Connect AniList'],
+	['animelist', 'Your lists'],
+	['progress', 'Log episodes'],
+	['alerts', 'Episode DMs'],
+	['compat', 'Taste match'],
+	['recommend', 'What to watch next'],
+	['wrapped', 'Your year in anime'],
+	['feed', 'Server activity'],
+];
+---
+
+<SiteLayout
+	title={`Miru · ${SITE.tagline}`}
+	description="Miru is a Discord bot for anime and manga. Search titles, find a scene from a screenshot, track your AniList, get episode alerts and share activity with your server."
+>
+	<main>
+		<!-- Hero -->
+		<section class="hero">
+			<Petals />
+			<div class="hero-kanji" aria-hidden="true">見る</div>
+			<div class="wrap hero-grid">
+				<div class="hero-copy">
+					<h1 class="rise" style="--d:1">
+						Your anime list,<br />right where your <em>friends</em> are.
+					</h1>
+					<p class="lede rise" style="--d:2">
+						Search any show, find a scene from a screenshot, log episodes to AniList and, with Miru+, get a DM the moment a new one airs. All without leaving Discord.
+					</p>
+					<div class="hero-ctas rise" style="--d:3">
+						<a class={buttonVariants()} href={INVITE.any} target="_blank" rel="noopener noreferrer">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+							Add to Discord
+						</a>
+						<a class={buttonVariants({ variant: 'outline' })} href="/docs/getting-started/">Get started</a>
+					</div>
+					<p class="hero-note rise" style="--d:4">
+						Powered by <a href="https://anilist.co" target="_blank" rel="noopener noreferrer">AniList</a> · No account needed to search
+					</p>
+				</div>
+
+				<div class="hero-visual rise" style="--d:2">
+					<div class="blob" aria-hidden="true"></div>
+					<DiscordCard />
+					<div class="float float-alert" aria-hidden="true">
+						<span class="float-icon">🔔</span>
+						<div>
+							<strong>New episode out now</strong>
+							<small>Episode 8 · you're caught up</small>
+						</div>
+					</div>
+					<div class="float float-compat" aria-hidden="true">
+						<div class="compat-row">
+							<strong>88%</strong>
+							<span>Taste twins</span>
+						</div>
+						<div class="bar"><span style="width:88%"></span></div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Features -->
+		<section class="section" id="features">
+			<div class="wrap">
+				<div class="section-head">
+					<p class="kicker">What Miru does</p>
+					<h2>Everything you'd open a tab for, <br class="br-lg" />now a slash command away.</h2>
+				</div>
+
+				<div class="bento">
+					<article class="tile tile-search">
+						<div class="tile-copy">
+							<span class="chip c-anime">/anime</span>
+							<span class="chip c-manga">/manga</span>
+							<span class="chip c-char">/character</span>
+							<h3>Look anything up</h3>
+							<p>
+								Scores, studios, air dates and a countdown to the next episode. Linked? Add it to
+								your list, +1 an episode or rate it right from the result.
+							</p>
+						</div>
+						<div class="mini-search" aria-hidden="true">
+							<div class="ms-input"><span class="ms-slash">/anime</span> query: <b>kusuriya</b><i class="caret"></i></div>
+							<ul>
+								<li class="on"><span>The Apothecary Diaries</span><small>TV · 2023 · 24 eps</small></li>
+								<li><span>The Apothecary Diaries Season 2</span><small>TV · 2025 · 24 eps</small></li>
+								</ul>
+						</div>
+					</article>
+
+					<article class="tile tile-trace">
+						<span class="chip">What anime is this?</span>
+						<h3>Name that scene</h3>
+						<p>Drop a screenshot or GIF and get the show, episode and exact timestamp.</p>
+						<div class="trace-card" aria-hidden="true">
+							<div class="trace-frame">
+								<span class="scan"></span>
+							</div>
+							<div class="trace-meta">
+								<strong>Scene found</strong>
+								<span>Episode 7 · 12:41</span>
+								<span class="pct">97% match</span>
+							</div>
+						</div>
+					</article>
+
+					<article class="tile tile-alerts">
+						<span class="chip">/alerts</span>
+						<span class="chip">✦ Miru+</span>
+						<h3>Never miss an episode</h3>
+						<p>A DM when something you're watching airs, with a one-tap "watched" button.</p>
+						<div class="dm" aria-hidden="true">
+							<div class="dm-line"><b>Final episode out now</b> · Episode 12</div>
+							<div class="dm-btns">
+								<span class="dbtn green">Mark episode 12 watched</span>
+								<span class="dbtn">Mute this show</span>
+							</div>
+						</div>
+					</article>
+
+					<article class="tile tile-feed">
+						<span class="chip">/feed</span>
+						<h3>See what your server's into</h3>
+						<p>An opt-in channel feed of finishes, drops and new starts. It even picks up changes made on AniList.</p>
+						<ul class="feed" aria-hidden="true">
+							<li><span class="av a1"></span><p><b>hana</b> completed <em>Bocchi the Rock!</em> <span class="score">★ 10</span></p></li>
+							<li><span class="av a2"></span><p><b>kei</b> started watching <em>Mushishi</em></p></li>
+							<li><span class="av a3"></span><p><b>yui</b> read chapters 40 - 44 of <em>Witch Hat Atelier</em></p></li>
+						</ul>
+					</article>
+
+					<article class="tile tile-compat">
+						<span class="chip">/compat</span>
+						<h3>Are you taste twins?</h3>
+						<p>Compare lists with anyone. See what you both loved, where you disagree, and what each of you should try.</p>
+						<div class="compat-ring" aria-hidden="true" style="--p:74">
+							<div><strong>74%</strong><small>Great match</small></div>
+						</div>
+					</article>
+
+					<article class="tile tile-wrapped">
+						<span class="chip">/wrapped</span>
+						<h3>Your year, on one card</h3>
+						<p>Hours watched, top genres, your favourite and your hottest take. Ready to share.</p>
+						<div class="wrapped" aria-hidden="true">
+							<small>2026 in anime</small>
+							<strong>≈ 214 h</strong>
+							<div class="w-stats">
+								<span><b>38</b> titles</span>
+								<span><b>612</b> eps</span>
+								<span><b>Top 8%</b></span>
+							</div>
+							<div class="w-strip"><i></i><i></i><i></i><i></i><i></i></div>
+						</div>
+					</article>
+				</div>
+
+				<div class="also">
+					<p>Also: <a href="/docs/commands/season/"><code>/season</code></a> charts, <a href="/docs/commands/progress/"><code>/progress</code></a> logging and <a href="/docs/commands/recommend/"><code>/recommend</code></a> picks for you or your whole server.</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Steps -->
+		<section class="section steps-section">
+			<div class="wrap">
+				<div class="section-head center">
+					<p class="kicker">Getting started</p>
+					<h2>Three steps to a comfier watchlist</h2>
+				</div>
+				<ol class="steps">
+					<li>
+						<span class="num">1</span>
+						<h3>Add Miru</h3>
+						<p>To your server, to your own account, or both. Searching works straight away.</p>
+					</li>
+					<li>
+						<span class="num">2</span>
+						<h3>Run <code>/link</code></h3>
+						<p>Approve Miru on AniList and paste the code back in. Only you see this part.</p>
+					</li>
+					<li>
+						<span class="num">3</span>
+						<h3>Start tracking</h3>
+						<p>Log episodes, rate shows and join the <code>/feed</code> to share with friends.</p>
+					</li>
+				</ol>
+			</div>
+		</section>
+
+		<!-- Install -->
+		<section class="section" id="install">
+			<div class="wrap">
+				<div class="section-head center">
+					<p class="kicker">Invite</p>
+					<h2>Pick how you'd like to add Miru</h2>
+					<p class="sub">Both work at the same time, so you can do both.</p>
+				</div>
+				<div class="install">
+					<article class="plan">
+						<div class="plan-icon" aria-hidden="true">🏡</div>
+						<h3>Add to a server</h3>
+						<p>For server admins. Everyone in the server can use Miru.</p>
+						<ul>
+							<li>Commands work in that server and in DMs</li>
+							<li>Includes the server activity <code>/feed</code></li>
+							<li>Server rankings on <code>/wrapped</code></li>
+							<li>Needs View Channel, Send Messages and Embed Links</li>
+						</ul>
+						<a class={cn(buttonVariants(), 'self-start')} href={INVITE.server} target="_blank" rel="noopener noreferrer">Add to server</a>
+					</article>
+					<article class="plan">
+						<div class="plan-icon" aria-hidden="true">🎀</div>
+						<h3>Add to my apps</h3>
+						<p>Just for you. Take Miru anywhere, no admin needed.</p>
+						<ul>
+							<li>Commands work in any server, DM or group DM</li>
+							<li>No permissions needed</li>
+							<li class="no">No <code>/feed</code>, which needs a server install</li>
+						</ul>
+						<a class={cn(buttonVariants({ variant: 'outline' }), 'self-start')} href={INVITE.personal} target="_blank" rel="noopener noreferrer">Add to my apps</a>
+					</article>
+				</div>
+			</div>
+		</section>
+
+		<!-- Commands strip -->
+		<section class="section cmd-section">
+			<div class="wrap">
+				<div class="section-head center">
+					<p class="kicker">Commands</p>
+					<h2>All the commands</h2>
+				</div>
+				<ul class="cmds">
+					{
+						commands.map(([name, label]) => (
+							<li>
+								<a href={`/docs/commands/${name}/`}>
+									<code>/{name}</code>
+									<span>{label}</span>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+				<p class="center"><a class="link-arrow" href="/docs/commands/">Full command reference →</a></p>
+			</div>
+		</section>
+
+		<!-- Premium teaser -->
+		<section class="premium-teaser-section">
+			<div class="wrap">
+				<Card className="premium-teaser">
+					<div class="teaser-icon" aria-hidden="true">✦</div>
+					<div class="teaser-copy">
+						<p class="kicker">Coming soon</p>
+						<h2>Miru Premium</h2>
+						<p>Sequel alerts and deeper stats for you, episode threads and leaderboards for your server.</p>
+					</div>
+					<a class={cn(buttonVariants({ variant: 'outline' }), 'teaser-btn')} href="/premium/">See what's planned</a>
+				</Card>
+			</div>
+		</section>
+
+		<!-- CTA -->
+		<section class="cta">
+			<div class="wrap cta-inner">
+				<Petals />
+				<h2>Pull up a cushion, put the kettle on.</h2>
+				<p>Miru is still growing, and we'd love the company.</p>
+				<div class="hero-ctas">
+					<a class={buttonVariants({ variant: 'light' })} href={INVITE.server} target="_blank" rel="noopener noreferrer">Add to server</a>
+					<a class={buttonVariants({ variant: 'light-outline' })} href="/docs/getting-started/">Read the guide</a>
+				</div>
+			</div>
+		</section>
+	</main>
+</SiteLayout>
+
+<script>
+	// Reveal sections as they scroll into view.
+	const io = new IntersectionObserver(
+		(entries) => {
+			for (const e of entries) {
+				if (e.isIntersecting) {
+					e.target.classList.add('in');
+					io.unobserve(e.target);
+				}
+			}
+		},
+		{ threshold: 0.15 },
+	);
+	document.querySelectorAll('.tile, .steps li, .plan, .cmds').forEach((el) => {
+		el.classList.add('reveal');
+		io.observe(el);
+	});
+</script>
+
+<style>
+	.premium-teaser-section {
+		padding-bottom: 56px;
+	}
+	.wrap > :global(.premium-teaser) {
+		flex-direction: row;
+		align-items: center;
+		gap: 24px;
+		max-width: 980px;
+		margin-inline: auto;
+		padding: 28px 32px;
+		background:
+			radial-gradient(60% 120% at 100% 0%, var(--pink-wash), transparent 70%),
+			var(--surface);
+	}
+	.teaser-icon {
+		flex: none;
+		width: 56px;
+		height: 56px;
+		display: grid;
+		place-items: center;
+		border-radius: 18px;
+		background: var(--pink-soft);
+		color: var(--pink-deep);
+		font-size: 26px;
+	}
+	.teaser-copy {
+		flex: 1;
+	}
+	.teaser-copy .kicker {
+		margin-bottom: 4px;
+	}
+	.teaser-copy h2 {
+		font-size: 26px;
+		font-weight: 900;
+	}
+	.teaser-copy p:last-child {
+		margin: 6px 0 0;
+		color: var(--ink-soft);
+		font-size: 16px;
+	}
+	.teaser-btn {
+		flex: none;
+	}
+
+	@media (max-width: 760px) {
+		.wrap > :global(.premium-teaser) {
+			flex-direction: column;
+			align-items: flex-start;
+			padding: 26px 24px;
+		}
+	}
+</style>

@@ -1,0 +1,68 @@
+---
+import '../styles/global.css';
+import '../styles/app.css';
+import SiteNav from '../components/SiteNav.astro';
+import SocialMeta from '../components/SocialMeta.astro';
+import { SITE } from '../site';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<title>{title} · {SITE.name}</title>
+		<SocialMeta title={`${title} · ${SITE.name}`} description={SITE.tagline} />
+		<link rel="icon" href="/favicon.ico" sizes="any" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/site.webmanifest" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Zen+Maru+Gothic:wght@500;700;900&display=swap"
+			rel="stylesheet"
+		/>
+		<script is:inline>
+			// Share the theme choice with the Starlight docs pages.
+			try {
+				const saved = localStorage.getItem('starlight-theme');
+				const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+				document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+			} catch {}
+		</script>
+	</head>
+	<body>
+		{
+			// Pages that pass their own nav (like login) get the bare brand bar. The rest
+			// share the landing page's nav.
+			Astro.slots.has('nav') ? (
+				<header class="nav">
+					<div class="wrap nav-inner">
+						<a class="brand" href="/">
+							<img src="/android-chrome-192x192.png" alt="" width="34" height="34" />
+							<span>{SITE.name}</span>
+						</a>
+						<div class="nav-actions">
+							<slot name="nav" />
+						</div>
+					</div>
+				</header>
+			) : (
+				<SiteNav user={Astro.locals.user} />
+			)
+		}
+		<main class="wrap app-main">
+			<slot />
+		</main>
+		<slot name="footer" />
+	</body>
+</html>
