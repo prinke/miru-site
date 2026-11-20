@@ -52,3 +52,7 @@ AniList couldn't be reached, so Miru used its Jikan (MyAnimeList) fallback. See 
 ## How do I disconnect my account?
 
 Run [`/unlink`](/docs/commands/link/#unlink), then remove Miru at **anilist.co → Settings → Apps**. See [Privacy](/docs/privacy/#removing-your-data).
+
+## Still stuck?
+
+Email [support@miru.fyi](mailto:support@miru.fyi). Bug reports are also welcome on [GitHub](https://github.com/prinke/miru/issues).

@@ -7,6 +7,7 @@ export const SITE = {
 	tagline: 'Anime & manga on Discord, powered by AniList',
 	source: 'https://github.com/prinke/miru',
 	author: { name: 'prinke.dev', href: 'https://prinke.dev' },
+	support: 'support@miru.fyi',
 };
 
 export const INVITE = {

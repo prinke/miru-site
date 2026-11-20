@@ -41,6 +41,8 @@ Nobody appears in a server feed, server recommendations or server rankings witho
 
 AniList has no way for apps to revoke their own access, so also remove Miru at **anilist.co → Settings → Apps**.
 
+To have everything else deleted, or for any privacy question, email [support@miru.fyi](mailto:support@miru.fyi).
+
 ## Third parties
 
 - **AniList**: account data and search.

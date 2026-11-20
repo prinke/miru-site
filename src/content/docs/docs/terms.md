@@ -37,7 +37,7 @@ Miru Premium isn't on sale yet. When it is, these rules apply:
 
 - **Billing.** Plans are paid up front and **renew automatically** each period until you cancel. Payments are handled by [Stripe](https://stripe.com). We never see or store your card details.
 - **Cancelling.** Cancel any time from your [dashboard](/dashboard/). You keep your perks until the end of the period you've paid for, and you won't be charged again.
-- **Refunds.** Payments are non-refundable, except where the law requires a refund or we decide to give one. If something went wrong, get in touch.
+- **Refunds.** Payments are non-refundable, except where the law requires a refund or we decide to give one. If something went wrong, email [support@miru.fyi](mailto:support@miru.fyi).
 - **Failed payments.** If a renewal fails, we'll retry it for a short time. If it still fails, the plan ends.
 - **Price changes.** We'll tell you before a price change applies to your plan, so you can cancel first.
 - **Server plans.** Miru for Servers belongs to the server it was bought for, and only someone with Manage Server can buy it. If Miru is removed from the server, the plan keeps renewing until you cancel it.
@@ -64,4 +64,4 @@ We may update these terms. The date at the top shows the latest version. For big
 
 ## Contact
 
-Questions about these terms? Open an issue on [GitHub](https://github.com/prinke/miru/issues) or reach out through [prinke.dev](https://prinke.dev).
+Questions about these terms, billing or your account? Email [support@miru.fyi](mailto:support@miru.fyi).
