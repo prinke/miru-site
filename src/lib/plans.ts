@@ -4,6 +4,13 @@
 //
 // Tier ids and scopes match the bot's premium/lib/entitlements.js.
 
+/**
+ * Whether Premium is on sale. While false, the site shows "Coming soon" in
+ * place of prices and buy buttons, and /api/billing/checkout refuses. Flip to
+ * true (once real prices are in PLANS and Stripe) to open sales.
+ */
+export const SALES_OPEN = false;
+
 export type Tier = 'plus' | 'servers' | 'supporter';
 
 export interface Plan {

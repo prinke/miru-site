@@ -4,7 +4,7 @@ import { fetchOverview, titleOf, type AniListOverview } from '../../lib/anilist'
 import { getDiscordAccount, getGuilds, guildIcon, type DiscordGuild } from '../../lib/discord';
 import * as billing from '../../lib/billing';
 import * as miru from '../../lib/miru';
-import { formatPrice, PLANS } from '../../lib/plans';
+import { formatPrice, PLANS, SALES_OPEN } from '../../lib/plans';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import SiteFooter from '../../components/SiteFooter.astro';
 import { AlertsSwitch } from '../../components/dashboard/AlertsSwitch';
@@ -453,6 +453,8 @@ const danger = buttonVariants({ variant: 'destructive', size: 'inline' });
 						</>
 					)}
 
+					{SALES_OPEN ? (
+					<>
 					<h3>Plans</h3>
 					<ul class="servers plans">
 						{(['plus', 'supporter'] as const).map((tier) => (
@@ -492,7 +494,13 @@ const danger = buttonVariants({ variant: 'destructive', size: 'inline' });
 							)}
 						</li>
 					</ul>
-					<p class="fine"><a href="/premium/">What each plan includes</a></p>
+					</>
+					) : (
+					<Alert className="block">
+						<strong>Coming soon.</strong> Premium isn't on sale yet. Check back soon.
+					</Alert>
+					)}
+					<p class="fine"><a href="/premium/">{SALES_OPEN ? 'What each plan includes' : "See what's planned"}</a></p>
 					</CardContent>
 					</Card>
 				</section>

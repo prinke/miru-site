@@ -3,7 +3,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 const QUESTIONS = [
 	{
 		q: 'When can I get Premium?',
-		a: "Not yet. Miru is still in development and the premium features are being built. This page shows what's planned, and details may change before launch.",
+		a: "Soon. Premium isn't on sale yet while the features are finished. This page shows what's planned, and details may change before it launches.",
 	},
 	{
 		q: 'How much will it cost?',

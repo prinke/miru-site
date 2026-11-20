@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { createCheckout, getCustomerId, createPortal, tiersOf } from '../../../lib/billing';
 import { getDiscordAccount, getGuilds } from '../../../lib/discord';
-import { isTier, PLANS } from '../../../lib/plans';
+import { isTier, PLANS, SALES_OPEN } from '../../../lib/plans';
 
 export const prerender = false;
 
@@ -9,6 +9,7 @@ const snowflake = /^\d{17,20}$/;
 
 /** Form POST from the pricing page or dashboard. Sends the user on to Stripe Checkout. */
 export const POST: APIRoute = async ({ locals, request, redirect, url }) => {
+	if (!SALES_OPEN) return redirect('/premium/', 303);
 	if (!locals.user) return redirect('/login/', 303);
 
 	const form = await request.formData();

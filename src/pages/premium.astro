@@ -6,7 +6,7 @@ import { Badge } from '../components/ui/badge';
 import { buttonVariants } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { cn } from '../lib/utils';
-import { formatPrice, PLANS, type Tier } from '../lib/plans';
+import { formatPrice, PLANS, SALES_OPEN, type Tier } from '../lib/plans';
 import { INVITE } from '../site';
 
 const tiers: { id: Tier; icon: string; name: string; who: string; featured?: boolean; features: string[] }[] = [
@@ -84,7 +84,11 @@ const tiers: { id: Tier; icon: string; name: string; who: string; featured?: boo
 				<div class="section-head center">
 					<p class="kicker">Plans</p>
 					<h2>Pick what fits</h2>
-					<p class="sub">Billed monthly. Cancel any time from your dashboard, and keep your perks until the period ends.</p>
+					<p class="sub">
+						{SALES_OPEN
+							? 'Billed monthly. Cancel any time from your dashboard, and keep your perks until the period ends.'
+							: "Premium isn't on sale yet. Here's what each plan will include."}
+					</p>
 				</div>
 
 				<div class="tiers">
@@ -100,13 +104,17 @@ const tiers: { id: Tier; icon: string; name: string; who: string; featured?: boo
 									<CardDescription className="text-[15px] text-ink-soft">{tier.who}</CardDescription>
 								</CardHeader>
 								<CardContent className="flex-1">
-									<p class="tier-price">{formatPrice(PLANS[tier.id])}</p>
+									<p class="tier-price">{SALES_OPEN ? formatPrice(PLANS[tier.id]) : 'Coming soon'}</p>
 									<ul class="tier-list">
 										{tier.features.map((f) => <li set:html={f} />)}
 									</ul>
 								</CardContent>
 								<CardFooter className="pb-[30px]">
-									{PLANS[tier.id].scope === 'guild' ? (
+									{!SALES_OPEN ? (
+										<button class={buttonVariants({ variant: tier.featured ? 'default' : 'outline' })} type="button" disabled>
+											Coming soon
+										</button>
+									) : PLANS[tier.id].scope === 'guild' ? (
 										// A server plan needs a server picked, which the dashboard can list.
 										<a class={buttonVariants({ variant: tier.featured ? 'default' : 'outline' })} href="/dashboard/#h-premium">
 											Choose a server
