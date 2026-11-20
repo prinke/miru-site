@@ -125,6 +125,7 @@ export default defineConfig({
 					items: [
 						{ label: 'FAQ', slug: 'docs/faq' },
 						{ label: 'Privacy', slug: 'docs/privacy' },
+						{ label: 'Terms of Service', slug: 'docs/terms' },
 					],
 				},
 			],
